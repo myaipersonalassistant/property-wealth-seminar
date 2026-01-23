@@ -1,0 +1,396 @@
+/**
+ * Sample Backend Server Implementation
+ * 
+ * This is a reference implementation for the API endpoints needed by the frontend.
+ * Save this as `server.js` in your backend folder and customize as needed.
+ * 
+ * Installation:
+ * npm install express stripe google-spreadsheet google-auth-library nodemailer cors dotenv
+ */
+
+const express = require('express');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const { GoogleSpreadsheet } = require('google-spreadsheet');
+const { JWT } = require('google-auth-library');
+const nodemailer = require('nodemailer');
+const cors = require('cors');
+require('dotenv').config();
+
+const app = express();
+
+// Middleware
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+}));
+app.use(express.json());
+
+// Raw body for webhook signature verification
+app.use('/api/webhooks/stripe', express.raw({type: 'application/json'}));
+
+// ============================================
+// Google Sheets Setup
+// ============================================
+
+const serviceAccountAuth = new JWT({
+  email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+  key: process.env.GOOGLE_SERVICE_ACCOUNT_KEY.replace(/\\n/g, '\n'),
+  scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+});
+
+const doc = new GoogleSpreadsheet(process.env.GOOGLE_SHEETS_ID, serviceAccountAuth);
+
+async function addToGoogleSheets(data) {
+  try {
+    await doc.loadInfo();
+    const sheet = doc.sheetsByIndex[0];
+    
+    await sheet.addRow({
+      order_reference: data.order_reference,
+      customer_name: data.customer_name,
+      customer_email: data.customer_email,
+      customer_phone: data.customer_phone || '',
+      quantity: data.quantity,
+      amount_total: data.amount_total,
+      stripe_session_id: data.stripe_session_id || '',
+      stripe_payment_intent_id: data.stripe_payment_intent_id || '',
+      status: data.status,
+      created_at: data.created_at,
+      updated_at: data.updated_at,
+    });
+  } catch (error) {
+    console.error('Error adding to Google Sheets:', error);
+    throw error;
+  }
+}
+
+async function updateGoogleSheets(orderRef, updates) {
+  try {
+    await doc.loadInfo();
+    const sheet = doc.sheetsByIndex[0];
+    const rows = await sheet.getRows();
+    
+    const row = rows.find(r => r.order_reference === orderRef);
+    if (row) {
+      for (const [key, value] of Object.entries(updates)) {
+        row[key] = value;
+      }
+      await row.save();
+    }
+  } catch (error) {
+    console.error('Error updating Google Sheets:', error);
+    throw error;
+  }
+}
+
+async function getFromGoogleSheets(orderRef) {
+  try {
+    await doc.loadInfo();
+    const sheet = doc.sheetsByIndex[0];
+    const rows = await sheet.getRows();
+    
+    const row = rows.find(r => r.order_reference === orderRef);
+    return row ? row.toObject() : null;
+  } catch (error) {
+    console.error('Error reading from Google Sheets:', error);
+    throw error;
+  }
+}
+
+// ============================================
+// Email Setup
+// ============================================
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASSWORD, // Use app-specific password
+  },
+});
+
+async function sendConfirmationEmail(data) {
+  try {
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: data.email,
+      subject: `Booking Confirmed - Your Seminar Tickets (${data.orderRef})`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h1 style="color: #2d3748; margin-bottom: 20px;">Booking Confirmed! 🎉</h1>
+          
+          <p>Hi ${data.name},</p>
+          
+          <p>Thank you for booking your tickets to our seminar. Your booking has been confirmed!</p>
+          
+          <div style="background-color: #f7fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="margin-top: 0;">Your Booking Details</h3>
+            <p><strong>Order Reference:</strong> ${data.orderRef}</p>
+            <p><strong>Number of Tickets:</strong> ${data.quantity}</p>
+            <p><strong>Event Date:</strong> Friday, 14 March 2026</p>
+            <p><strong>Time:</strong> 2:00 PM – 4:00 PM (Doors open 1:15 PM)</p>
+            <p><strong>Location:</strong> Whitla Hall, Methodist College Belfast</p>
+          </div>
+          
+          <h3>What Happens Next?</h3>
+          <ul>
+            <li>Please bring this email or your order reference to the event for check-in</li>
+            <li>Arrive early to secure your preferred seating</li>
+            <li>Check the website for any updates before the event</li>
+          </ul>
+          
+          <h3>Can't Make It?</h3>
+          <p>Tickets are non-refundable but transferable. If you can't attend, you can transfer your tickets to someone else.</p>
+          
+          <hr style="margin: 30px 0; border: none; border-top: 1px solid #e2e8f0;">
+          
+          <p>If you have any questions, please reply to this email or visit our website.</p>
+          
+          <p>Best regards,<br>
+          The Seminar Team</p>
+        </div>
+      `,
+    };
+    
+    await transporter.sendMail(mailOptions);
+    console.log(`Confirmation email sent to ${data.email}`);
+  } catch (error) {
+    console.error('Error sending email:', error);
+  }
+}
+
+// ============================================
+// API Endpoints
+// ============================================
+
+/**
+ * Create Stripe Checkout Session
+ */
+app.post('/api/create-checkout-session', async (req, res) => {
+  try {
+    const { name, email, phone, quantity, ticketPrice, successUrl, cancelUrl } = req.body;
+
+    // Validate input
+    if (!name || !email || !quantity || !ticketPrice) {
+      return res.status(400).json({
+        error: 'Missing required fields: name, email, quantity, ticketPrice',
+      });
+    }
+
+    // Generate order reference
+    const timestamp = Date.now();
+    const randomId = Math.random().toString(36).substr(2, 9).toUpperCase();
+    const orderRef = `ORDER-${timestamp}-${randomId}`;
+
+    // Create Stripe checkout session
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price_data: {
+            currency: 'gbp',
+            product_data: {
+              name: 'Seminar Tickets',
+              description: `${quantity} ticket(s) for Friday, 14 March 2026`,
+            },
+            unit_amount: Math.round(ticketPrice * 100), // Amount in pence
+          },
+          quantity: quantity,
+        },
+      ],
+      mode: 'payment',
+      success_url: `${successUrl}?session_id={CHECKOUT_SESSION_ID}&order_ref=${orderRef}`,
+      cancel_url: cancelUrl,
+      customer_email: email,
+      metadata: {
+        orderRef,
+        name,
+        phone: phone || '',
+        quantity,
+      },
+    });
+
+    // Add initial record to Google Sheets with "pending" status
+    await addToGoogleSheets({
+      order_reference: orderRef,
+      customer_name: name,
+      customer_email: email,
+      customer_phone: phone || '',
+      quantity: quantity,
+      amount_total: Math.round(ticketPrice * quantity * 100),
+      stripe_session_id: session.id,
+      status: 'pending',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    });
+
+    res.json({
+      url: session.url,
+      sessionId: session.id,
+    });
+  } catch (error) {
+    console.error('Error creating checkout session:', error);
+    res.status(500).json({
+      error: error.message || 'Failed to create checkout session',
+    });
+  }
+});
+
+/**
+ * Verify Payment Session
+ */
+app.get('/api/verify-session/:sessionId', async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+
+    res.json({
+      sessionId: session.id,
+      status: session.payment_status,
+      amountTotal: session.amount_total,
+      customerEmail: session.customer_email,
+      metadata: session.metadata,
+    });
+  } catch (error) {
+    console.error('Error verifying session:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * Get Ticket Purchase
+ */
+app.get('/api/tickets/:orderReference', async (req, res) => {
+  try {
+    const { orderReference } = req.params;
+
+    const ticket = await getFromGoogleSheets(orderReference);
+
+    if (!ticket) {
+      return res.status(404).json({ error: 'Ticket not found' });
+    }
+
+    res.json(ticket);
+  } catch (error) {
+    console.error('Error fetching ticket:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * Add Ticket Purchase
+ */
+app.post('/api/tickets', async (req, res) => {
+  try {
+    const data = req.body;
+
+    await addToGoogleSheets(data);
+
+    res.json({ success: true, order_reference: data.order_reference });
+  } catch (error) {
+    console.error('Error adding ticket:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * Update Ticket Purchase
+ */
+app.patch('/api/tickets/:orderReference', async (req, res) => {
+  try {
+    const { orderReference } = req.params;
+    const updates = req.body;
+
+    await updateGoogleSheets(orderReference, updates);
+
+    const updated = await getFromGoogleSheets(orderReference);
+
+    res.json(updated);
+  } catch (error) {
+    console.error('Error updating ticket:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * Stripe Webhook Handler
+ */
+app.post('/api/webhooks/stripe', async (req, res) => {
+  const sig = req.headers['stripe-signature'];
+  const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+  let event;
+
+  try {
+    event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+  } catch (err) {
+    console.error('Webhook error:', err);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+
+  try {
+    // Handle the event
+    switch (event.type) {
+      case 'checkout.session.completed':
+        const session = event.data.object;
+        
+        // Update Google Sheets with completed status
+        await updateGoogleSheets(session.metadata.orderRef, {
+          status: 'completed',
+          stripe_payment_intent_id: session.payment_intent,
+          updated_at: new Date().toISOString(),
+        });
+
+        // Send confirmation email
+        await sendConfirmationEmail({
+          email: session.customer_email,
+          name: session.metadata.name,
+          orderRef: session.metadata.orderRef,
+          quantity: session.metadata.quantity,
+        });
+
+        console.log(`Payment completed for order ${session.metadata.orderRef}`);
+        break;
+
+      case 'checkout.session.expired':
+        const expiredSession = event.data.object;
+        
+        // Update status to failed
+        await updateGoogleSheets(expiredSession.metadata.orderRef, {
+          status: 'failed',
+          updated_at: new Date().toISOString(),
+        });
+
+        console.log(`Checkout expired for order ${expiredSession.metadata.orderRef}`);
+        break;
+
+      default:
+        console.log(`Unhandled event type ${event.type}`);
+    }
+
+    res.json({received: true});
+  } catch (error) {
+    console.error('Error processing webhook:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * Health Check
+ */
+app.get('/health', (req, res) => {
+  res.json({ status: 'OK' });
+});
+
+// ============================================
+// Start Server
+// ============================================
+
+const PORT = process.env.PORT || 3001;
+
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+});
+
+module.exports = app;

@@ -9,6 +9,8 @@ import Index from "./pages/Index";
 import Disclaimer from "./pages/Disclaimer";
 import Booking from "./pages/Booking";
 import BookPurchase from "./pages/BookPurchase";
+import PaymentSuccess from "./pages/PaymentSuccess";
+import PaymentCancelled from "./pages/PaymentCancelled";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,6 +27,8 @@ const App = () => (
             <Route path="/disclaimer" element={<Disclaimer />} />
             <Route path="/booking" element={<Booking />} />
             <Route path="/book" element={<BookPurchase />} />
+            <Route path="/payment-success" element={<PaymentSuccess />} />
+            <Route path="/payment-cancelled" element={<PaymentCancelled />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

@@ -19,21 +19,19 @@ import {
   Target,
   Briefcase,
   Home,
-  TrendingUp,
-  XCircle
+  TrendingUp
 } from 'lucide-react';
 import CountdownTimer from './CountdownTimer';
 import FAQAccordion from './FAQAccordion';
 import PanelCard from './PanelCard';
 import ReasonCard from './ReasonCard';
-import PaymentSuccess from './PaymentSuccess';
 import Footer from './Footer';
 import { Link } from 'react-router-dom';
 
 // Image URLs
 const images = {
   host: './profile.jpg',
-  book: 'https://d64gsuwffb70l.cloudfront.net/697242eb29a6a04fc9873637_1769096042346_3741c746.jpg',
+  book: './fina.JPG',
   venue: 'https://d64gsuwffb70l.cloudfront.net/697242eb29a6a04fc9873637_1769096061879_b13955d3.jpg',
   chrisDolan: 'https://d64gsuwffb70l.cloudfront.net/697242eb29a6a04fc9873637_1769096087877_ca812ae1.jpg',
   lewisMills: 'https://d64gsuwffb70l.cloudfront.net/697242eb29a6a04fc9873637_1769096105352_c9c5ee9c.jpg',
@@ -137,9 +135,6 @@ const audienceTypes = [
 const AppLayout: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [paymentStatus, setPaymentStatus] = useState<'success' | 'cancelled' | null>(null);
-  const [sessionId, setSessionId] = useState<string | null>(null);
-  const [orderRef, setOrderRef] = useState<string | null>(null);
   
   useEffect(() => {
     const handleScroll = () => {
@@ -149,26 +144,6 @@ const AppLayout: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
   
-  // Check for payment status in URL on mount
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const payment = urlParams.get('payment');
-    const sid = urlParams.get('session_id');
-    const ref = urlParams.get('ref');
-    
-    if (payment === 'success') {
-      setPaymentStatus('success');
-      setSessionId(sid);
-      setOrderRef(ref);
-      // Clean up URL
-      window.history.replaceState({}, document.title, window.location.pathname);
-    } else if (payment === 'cancelled') {
-      setPaymentStatus('cancelled');
-      // Clean up URL
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
-  }, []);
-
   // Handle hash navigation from other pages
   useEffect(() => {
     const hash = window.location.hash.replace('#', '');
@@ -178,12 +153,6 @@ const AppLayout: React.FC = () => {
       }, 100);
     }
   }, []);
-  
-  const handleClosePaymentStatus = () => {
-    setPaymentStatus(null);
-    setSessionId(null);
-    setOrderRef(null);
-  };
   
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
@@ -885,45 +854,6 @@ const AppLayout: React.FC = () => {
 
       {/* Footer */}
       <Footer />
-      
-      {/* Payment Success Modal */}
-      {paymentStatus === 'success' && (
-        <PaymentSuccess 
-          sessionId={sessionId} 
-          orderRef={orderRef} 
-          onClose={handleClosePaymentStatus} 
-        />
-      )}
-      
-      {/* Payment Cancelled Modal */}
-      {paymentStatus === 'cancelled' && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 text-center animate-in fade-in zoom-in duration-300">
-            <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <XCircle className="w-10 h-10 text-red-600" />
-            </div>
-            <h3 className="text-2xl font-bold text-slate-800 mb-2">Payment Cancelled</h3>
-            <p className="text-slate-600 mb-6">
-              Your payment was cancelled. No charges have been made to your account.
-            </p>
-            <div className="space-y-3">
-              <Link
-                to="/booking"
-                onClick={handleClosePaymentStatus}
-                className="w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl font-semibold hover:from-amber-600 hover:to-amber-700 transition-all text-center block"
-              >
-                Try Again
-              </Link>
-              <button
-                onClick={handleClosePaymentStatus}
-                className="w-full py-3 bg-slate-100 text-slate-700 rounded-xl font-semibold hover:bg-slate-200 transition-all"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

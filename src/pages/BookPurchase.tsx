@@ -14,8 +14,10 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { createBookCheckoutSession } from '@/lib/stripe';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { Loader2 } from 'lucide-react';
 
 const BookPurchase: React.FC = () => {
   const [selectedOption, setSelectedOption] = useState<'amazon' | 'uk' | null>(null);
@@ -28,8 +30,9 @@ const BookPurchase: React.FC = () => {
     postcode: '',
   });
   const [error, setError] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  const bookPrice = 0; // Price to be determined
+  const bookPrice = 19.99; // Book price
   const ukShipping = 4.99;
   const ukTotal = bookPrice + ukShipping;
 
@@ -72,15 +75,42 @@ const BookPurchase: React.FC = () => {
     window.open('https://www.amazon.co.uk', '_blank');
   };
 
-  const handleUKOrder = (e: React.FormEvent) => {
+  const handleUKOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!validateUKForm()) {
       return;
     }
 
-    // This would integrate with payment system
-    alert('UK book order functionality will be integrated with payment system. Please check back soon or purchase at the event.');
+    setIsProcessing(true);
+    setError(null);
+
+    try {
+      const result = await createBookCheckoutSession({
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        phone: formData.phone.trim() || undefined,
+        address: formData.address.trim(),
+        city: formData.city.trim(),
+        postcode: formData.postcode.trim(),
+        bookPrice: bookPrice,
+        shippingPrice: ukShipping,
+      });
+
+      if (result.error) {
+        throw new Error(result.error);
+      }
+
+      if (result.url) {
+        window.location.href = result.url;
+      } else {
+        throw new Error('No checkout URL received');
+      }
+    } catch (err: any) {
+      console.error('Checkout error:', err);
+      setError(err.message || 'Something went wrong. Please try again.');
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -106,7 +136,7 @@ const BookPurchase: React.FC = () => {
                   <div className="text-center mb-6">
                     <div className="w-32 h-48 mx-auto mb-4 rounded-lg shadow-2xl overflow-hidden">
                       <img 
-                        src="https://d64gsuwffb70l.cloudfront.net/697242eb29a6a04fc9873637_1769096042346_3741c746.jpg"
+                        src="./fina.JPG"
                         alt="Build Wealth Through Property Book"
                         className="w-full h-full object-cover"
                       />
@@ -358,6 +388,7 @@ const BookPurchase: React.FC = () => {
                                 <span className="text-slate-600">Book Price</span>
                                 <span className="font-semibold text-slate-800">£{bookPrice.toFixed(2)}</span>
                               </div>
+                              <p className="text-xs text-slate-500 mb-2">100% of proceeds go to charity</p>
                               <div className="flex justify-between items-center mb-2">
                                 <span className="text-slate-600">UK Shipping</span>
                                 <span className="font-semibold text-slate-800">£{ukShipping.toFixed(2)}</span>
@@ -369,10 +400,20 @@ const BookPurchase: React.FC = () => {
                             </div>
                             <button
                               type="submit"
-                              className="w-full py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl font-semibold text-lg hover:from-amber-600 hover:to-amber-700 transition-all shadow-lg shadow-amber-500/25 flex items-center justify-center gap-2"
+                              disabled={isProcessing}
+                              className="w-full py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl font-semibold text-lg hover:from-amber-600 hover:to-amber-700 transition-all shadow-lg shadow-amber-500/25 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                             >
-                              <CreditCard className="w-5 h-5" />
-                              Proceed to Payment — £{ukTotal.toFixed(2)}
+                              {isProcessing ? (
+                                <>
+                                  <Loader2 className="w-5 h-5 animate-spin" />
+                                  Redirecting to checkout...
+                                </>
+                              ) : (
+                                <>
+                                  <CreditCard className="w-5 h-5" />
+                                  Proceed to Payment — £{ukTotal.toFixed(2)}
+                                </>
+                              )}
                             </button>
                           </form>
                         )}

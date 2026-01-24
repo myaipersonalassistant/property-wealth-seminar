@@ -34,6 +34,10 @@ export interface TicketPurchase {
   stripe_session_id?: string;
   stripe_payment_intent_id?: string;
   status: 'pending' | 'completed' | 'failed';
+  product_type?: 'ticket' | 'book';
+  shipping_address?: string;
+  shipping_city?: string;
+  shipping_postcode?: string;
   created_at: string;
   updated_at: string;
 }

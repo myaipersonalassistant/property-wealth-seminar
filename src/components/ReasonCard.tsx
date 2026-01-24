@@ -1,12 +1,12 @@
 import React from 'react';
 import { 
-  Building2, 
-  TrendingUp, 
-  MapPin, 
+  Compass, 
   Banknote, 
   Scale, 
-  RefreshCw, 
-  Layers 
+  Shield, 
+  TrendingUp, 
+  Umbrella, 
+  Calculator
 } from 'lucide-react';
 
 interface ReasonCardProps {
@@ -15,10 +15,10 @@ interface ReasonCardProps {
   description: string;
 }
 
-const icons = [Building2, TrendingUp, MapPin, Banknote, Scale, RefreshCw, Layers];
+const icons = [Compass, Banknote, Scale, Shield, TrendingUp, Umbrella, Calculator];
 
 const ReasonCard: React.FC<ReasonCardProps> = ({ number, title, description }) => {
-  const Icon = icons[number - 1] || Building2;
+  const Icon = icons[number - 1] || Compass;
   
   return (
     <div className="group bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-slate-100">

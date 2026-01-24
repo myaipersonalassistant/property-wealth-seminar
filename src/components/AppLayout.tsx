@@ -26,12 +26,13 @@ import CountdownTimer from './CountdownTimer';
 import FAQAccordion from './FAQAccordion';
 import PanelCard from './PanelCard';
 import ReasonCard from './ReasonCard';
-import TicketModal from './TicketModal';
 import PaymentSuccess from './PaymentSuccess';
+import Footer from './Footer';
+import { Link } from 'react-router-dom';
 
 // Image URLs
 const images = {
-  host: 'https://d64gsuwffb70l.cloudfront.net/697242eb29a6a04fc9873637_1769096021984_e5a60e10.jpg',
+  host: './profile.jpg',
   book: 'https://d64gsuwffb70l.cloudfront.net/697242eb29a6a04fc9873637_1769096042346_3741c746.jpg',
   venue: 'https://d64gsuwffb70l.cloudfront.net/697242eb29a6a04fc9873637_1769096061879_b13955d3.jpg',
   chrisDolan: 'https://d64gsuwffb70l.cloudfront.net/697242eb29a6a04fc9873637_1769096087877_ca812ae1.jpg',
@@ -63,47 +64,41 @@ const panelists = [
     description: 'Real-world investing experiences, lessons learned, and practical portfolio building strategies.'
   },
   {
-    name: 'Raymond Crooks',
+    name: '',
     role: 'Solicitor',
     image: images.raymond,
     description: 'Legal responsibilities, conveyancing processes, and understanding eviction realities.'
-  },
-  {
-    name: 'TBC',
-    role: 'Accountant / Tax Specialist',
-    image: images.accountant,
-    description: 'Tax planning strategies, portfolio structure, and maximising returns through proper accounting.'
   },
 ];
 
 const reasons = [
   {
-    title: 'Property as a Store of Value',
-    description: 'Unlike cash that loses purchasing power, property has historically maintained and grown in value over time.'
+    title: 'Multiple Pathways to Wealth',
+    description: "Property isn't one strategy — it's a system with options that creates resilience and choice."
   },
   {
-    title: 'The Impact of Inflation',
-    description: 'Understand how inflation affects both your assets and debt, and why property owners often benefit.'
+    title: 'Predictable, Repeatable Income',
+    description: 'Rental income provides steady cash flow and long-term financial stability.'
   },
   {
-    title: 'Capital Growth & Location',
-    description: 'Learn how location dynamics drive property appreciation and how to identify growth areas.'
+    title: 'Leverages "Other People\'s Money"',
+    description: 'Leverage allows small deposits to control large assets, multiplying returns and accelerating growth.'
   },
   {
-    title: 'Rental Income & Cash Flow',
-    description: 'Discover the realities of generating consistent rental income and managing cash flow effectively.'
+    title: 'Reliable Store of Value',
+    description: 'Property preserves wealth because land is scarce and demand is constant.'
   },
   {
-    title: 'Responsible Use of Leverage',
-    description: 'How to use mortgage financing wisely to amplify returns while managing risk appropriately.'
+    title: 'Appreciates Over Time',
+    description: 'Property is one of the strongest appreciating assets, driven by supply, demand, and economic factors.'
   },
   {
-    title: 'Refinancing & Recycling Capital',
-    description: 'Strategies for releasing equity and reinvesting to grow your portfolio sustainably.'
+    title: 'Powerful Hedge Against Inflation',
+    description: 'As the cost of living rises, property protects purchasing power and makes debt cheaper in real terms.'
   },
   {
-    title: 'The Power of Compounding',
-    description: 'How small, consistent investments in property can compound into significant long-term wealth.'
+    title: 'Significant Tax Advantages',
+    description: 'Governments encourage property ownership through various tax benefits and incentives.'
   },
 ];
 
@@ -141,7 +136,6 @@ const audienceTypes = [
 
 const AppLayout: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState<'success' | 'cancelled' | null>(null);
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -172,6 +166,16 @@ const AppLayout: React.FC = () => {
       setPaymentStatus('cancelled');
       // Clean up URL
       window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
+
+  // Handle hash navigation from other pages
+  useEffect(() => {
+    const hash = window.location.hash.replace('#', '');
+    if (hash) {
+      setTimeout(() => {
+        scrollToSection(hash);
+      }, 100);
     }
   }, []);
   
@@ -220,12 +224,12 @@ const AppLayout: React.FC = () => {
                   {item}
                 </button>
               ))}
-              <button
-                onClick={() => setIsModalOpen(true)}
+              <Link
+                to="/booking"
                 className="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg font-semibold hover:from-amber-600 hover:to-amber-700 transition-all shadow-lg shadow-amber-500/25"
               >
                 Book Now — £10
-              </button>
+              </Link>
             </div>
             
             {/* Mobile Menu Button */}
@@ -251,15 +255,13 @@ const AppLayout: React.FC = () => {
                   {item}
                 </button>
               ))}
-              <button
-                onClick={() => {
-                  setIsModalOpen(true);
-                  setIsMenuOpen(false);
-                }}
-                className="w-full px-4 py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg font-semibold"
+              <Link
+                to="/booking"
+                onClick={() => setIsMenuOpen(false)}
+                className="w-full px-4 py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg font-semibold text-center block"
               >
                 Book Now — £10
-              </button>
+              </Link>
             </div>
           </div>
         )}
@@ -286,7 +288,7 @@ const AppLayout: React.FC = () => {
               </div>
               
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6">
-                Build Wealth Through Property —{' '}
+                Build Wealth Through Property{' '} <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-500">
                   7 Reasons Why
                 </span>
@@ -297,24 +299,26 @@ const AppLayout: React.FC = () => {
               </p>
               
               <p className="text-slate-400 mb-8 leading-relaxed">
-                Join property investor and author <strong className="text-white">Chris Ifonlaja</strong>, alongside a panel of experienced property professionals, for a powerful and practical seminar exploring how ordinary people can use property to build long-term financial security.
+                Join property investor and author <strong className="text-white">Chris Ifonlaja</strong>, alongside a panel of experienced property professionals, for a powerful and practical seminar exploring how people can use property to build long-term financial security.
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 mb-10">
-                <button
-                  onClick={() => setIsModalOpen(true)}
+                <Link
+                  to="/booking"
                   className="group px-8 py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl font-semibold text-lg hover:from-amber-600 hover:to-amber-700 transition-all shadow-xl shadow-amber-500/30 flex items-center justify-center gap-2"
                 >
                   <Ticket className="w-5 h-5" />
                   Book Your Seat — £10
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </button>
-                <button
-                  onClick={() => scrollToSection('about')}
-                  className="px-8 py-4 bg-white/10 backdrop-blur-sm border border-white/20 text-white rounded-xl font-semibold hover:bg-white/20 transition-all"
+                </Link>
+                <Link
+                  to="/book"
+                  className="group px-8 py-4 bg-white/10 backdrop-blur-sm border border-white/20 text-white rounded-xl font-semibold hover:bg-white/20 transition-all flex items-center justify-center gap-2"
                 >
-                  Learn More
-                </button>
+                  <BookOpen className="w-5 h-5" />
+                  Buy the Book
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </Link>
               </div>
               
               {/* Countdown Timer */}
@@ -332,6 +336,16 @@ const AppLayout: React.FC = () => {
                   alt="Build Wealth Through Property Book"
                   className="w-48 mx-auto mb-6 rounded-lg shadow-2xl"
                 />
+                <div className="text-center mb-6">
+                  <p className="text-white font-semibold text-lg mb-2">Available Now</p>
+                  <p className="text-slate-300 text-sm mb-4">Purchase the book at the event or online</p>
+                  <Link
+                    to="/book"
+                    className="px-6 py-2.5 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/30 text-white rounded-lg font-semibold text-sm transition-all inline-block"
+                  >
+                    Buy the Book
+                  </Link>
+                </div>
                 <div className="space-y-4">
                   <div className="flex items-center gap-4 text-white">
                     <div className="w-12 h-12 bg-amber-500/20 rounded-xl flex items-center justify-center">
@@ -422,7 +436,7 @@ const AppLayout: React.FC = () => {
               The 7 Core Reasons Property Builds Wealth
             </h2>
             <p className="text-slate-600 text-lg leading-relaxed">
-              Property remains one of the most reliable ways to build long-term wealth, but real success depends on understanding how income, growth, finance, tax, and risk all work together over time.
+              Property remains one of the most reliable ways to build long-term wealth, but real success depends on understanding how income, growth, finance, tax, and risk all work together over time. These principles are explored in depth both at the seminar and in the book <em>"Build Wealth Through Property 7 Reasons Why"</em>.
             </p>
           </div>
           
@@ -441,8 +455,11 @@ const AppLayout: React.FC = () => {
                 <p className="text-slate-300 text-lg mb-4">
                   Each principle is explained using real-world experience — including mistakes, lessons learned, and practical examples — so attendees can apply the ideas responsibly and sustainably.
                 </p>
-                <p className="text-amber-400 font-semibold">
+                <p className="text-amber-400 font-semibold mb-4">
                   This is not a get-rich-quick talk. It is a grounded, experience-based session.
+                </p>
+                <p className="text-slate-300 text-sm">
+                  The same principles are explored in detail in the book, available for purchase at the event or online.
                 </p>
               </div>
             </div>
@@ -482,14 +499,24 @@ const AppLayout: React.FC = () => {
               </p>
               <div className="space-y-4 text-slate-600 leading-relaxed">
                 <p>
-                  Chris is a property investor, community leader, and author of <em className="text-slate-800 font-medium">Build Wealth Through Property — 7 Reasons Why</em>. His journey includes both successful investments and difficult seasons shaped by market downturns, tenant challenges, and financing pressures.
+                  Chris is a property investor, community leader, and author of <em className="text-slate-800 font-medium">Build Wealth Through Property 7 Reasons Why</em>. His journey includes both successful investments and difficult seasons shaped by market downturns, tenant challenges, and financing pressures.
                 </p>
                 <p>
-                  Through this seminar, Chris shares not only strategies, but also the importance of stewardship, discipline, and long-term thinking in building wealth that lasts.
+                  Through this seminar and his book, Chris shares not only strategies, but also the importance of stewardship, discipline, and long-term thinking in building wealth that lasts. The book is available for purchase at the event, with all proceeds supporting Place of Victory Charity.
                 </p>
                 <p>
                   His wider mission is to combine financial education with community transformation, helping individuals grow while also strengthening the communities around them.
                 </p>
+              </div>
+              <div className="mt-8 flex flex-wrap gap-4">
+                <Link
+                  to="/book"
+                  className="group px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg font-semibold hover:from-amber-600 hover:to-amber-700 transition-all shadow-lg shadow-amber-500/25 flex items-center gap-2"
+                >
+                  <BookOpen className="w-5 h-5" />
+                  Purchase the Book
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </Link>
               </div>
               <div className="mt-8 flex flex-wrap gap-4">
                 <div className="flex items-center gap-2 bg-slate-100 rounded-lg px-4 py-2">
@@ -575,14 +602,24 @@ const AppLayout: React.FC = () => {
                   </div>
                 ))}
               </div>
-              <button
-                onClick={() => setIsModalOpen(true)}
-                className="mt-8 group px-8 py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl font-semibold text-lg hover:from-amber-600 hover:to-amber-700 transition-all shadow-xl shadow-amber-500/30 flex items-center gap-2"
-              >
-                <Ticket className="w-5 h-5" />
-                Book Your Seat Now
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </button>
+              <div className="mt-8 flex flex-col sm:flex-row gap-4">
+                <Link
+                  to="/booking"
+                  className="group px-8 py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl font-semibold text-lg hover:from-amber-600 hover:to-amber-700 transition-all shadow-xl shadow-amber-500/30 flex items-center justify-center gap-2"
+                >
+                  <Ticket className="w-5 h-5" />
+                  Book Your Seat Now
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </Link>
+                <Link
+                  to="/book"
+                  className="px-8 py-4 bg-white/10 backdrop-blur-sm border border-white/20 text-white rounded-xl font-semibold text-lg hover:bg-white/20 transition-all flex items-center justify-center gap-2"
+                >
+                  <BookOpen className="w-5 h-5" />
+                  Buy the Book
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </Link>
+              </div>
             </div>
             
             <div className="relative">
@@ -595,6 +632,92 @@ const AppLayout: React.FC = () => {
               <div className="absolute bottom-6 left-6 right-6">
                 <p className="text-white font-semibold text-lg">Whitla Hall</p>
                 <p className="text-slate-300">Methodist College Belfast</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Book Purchase Section */}
+      <section id="book" className="py-20 sm:py-28 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="relative">
+              <div className="absolute -top-4 -left-4 w-72 h-72 bg-amber-500/20 rounded-full blur-3xl" />
+              <img 
+                src={images.book} 
+                alt="Build Wealth Through Property Book"
+                className="relative rounded-2xl shadow-2xl w-full max-w-md mx-auto"
+              />
+            </div>
+            
+            <div>
+              <span className="inline-block px-4 py-1.5 bg-amber-100 text-amber-700 rounded-full text-sm font-semibold mb-4">
+                Available Now
+              </span>
+              <h2 className="text-3xl sm:text-4xl font-bold text-slate-800 mb-4">
+                Build Wealth Through Property 7 Reasons Why
+              </h2>
+              <p className="text-amber-600 font-semibold text-lg mb-6">
+                The Complete Guide to Property Investment
+              </p>
+              <div className="space-y-4 text-slate-600 leading-relaxed mb-8">
+                <p>
+                  This comprehensive book explores the seven core reasons why property remains one of the most 
+                  reliable paths to building long-term wealth. Written from real-world experience, it provides 
+                  practical insights, lessons learned, and actionable strategies for both beginners and experienced 
+                  investors.
+                </p>
+                <p>
+                  The book covers everything from understanding leverage and financing to managing risk, tax 
+                  advantages, and building a sustainable property portfolio. Each chapter is grounded in practical 
+                  experience, including both successes and challenges.
+                </p>
+                <div className="bg-amber-50 rounded-xl p-6 border border-amber-200">
+                  <div className="flex items-start gap-4">
+                    <Heart className="w-6 h-6 text-rose-600 flex-shrink-0 mt-1" />
+                    <div>
+                      <p className="font-semibold text-slate-800 mb-2">Supporting Charity</p>
+                      <p className="text-slate-700 text-sm">
+                        All proceeds from book sales at the event will be donated to Place of Victory Charity, 
+                        supporting their mission to secure a permanent community location.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Link
+                  to="/book"
+                  className="group px-8 py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl font-semibold text-lg hover:from-amber-600 hover:to-amber-700 transition-all shadow-xl shadow-amber-500/30 flex items-center justify-center gap-2"
+                >
+                  <BookOpen className="w-5 h-5" />
+                  Purchase the Book
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </Link>
+                <Link
+                  to="/booking"
+                  className="px-8 py-4 bg-slate-100 text-slate-700 rounded-xl font-semibold hover:bg-slate-200 transition-all flex items-center justify-center gap-2"
+                >
+                  <Ticket className="w-5 h-5" />
+                  Book Seminar Ticket
+                </Link>
+              </div>
+              
+              <div className="mt-6 flex flex-wrap gap-4 text-sm text-slate-600">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-amber-500" />
+                  <span>Available at the event</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-amber-500" />
+                  <span>100% proceeds to charity</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-amber-500" />
+                  <span>Practical, experience-based content</span>
+                </div>
               </div>
             </div>
           </div>
@@ -701,24 +824,34 @@ const AppLayout: React.FC = () => {
         
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6">
-            Reserve Your Seat Today
+            Join Us for the Seminar or Get the Book
           </h2>
           <p className="text-xl text-slate-300 mb-4">
-            Seats are limited and this is a ticketed event.
+            Attend the live seminar or purchase the book to start your property investment journey.
           </p>
           <p className="text-slate-400 mb-10 max-w-2xl mx-auto">
-            Whether you are just starting your property journey or looking to invest more wisely, this seminar will give you clarity, confidence, and practical next steps — while also supporting a meaningful community cause.
+            Whether you are just starting your property journey or looking to invest more wisely, the seminar 
+            and book will give you clarity, confidence, and practical next steps — while also supporting a 
+            meaningful community cause.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-10">
-            <button
-              onClick={() => setIsModalOpen(true)}
+            <Link
+              to="/booking"
               className="group px-10 py-5 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl font-semibold text-lg hover:from-amber-600 hover:to-amber-700 transition-all shadow-xl shadow-amber-500/30 flex items-center justify-center gap-3"
             >
               <Ticket className="w-6 h-6" />
-              Book Your Seat Now — £10
+              Book Your Seat — £10
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </button>
+            </Link>
+            <Link
+              to="/book"
+              className="group px-10 py-5 bg-white/10 backdrop-blur-sm border border-white/20 text-white rounded-xl font-semibold text-lg hover:bg-white/20 transition-all flex items-center justify-center gap-3"
+            >
+              <BookOpen className="w-6 h-6" />
+              Purchase the Book
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </Link>
           </div>
           
           <div className="flex flex-wrap justify-center gap-6 text-slate-400">
@@ -738,76 +871,20 @@ const AppLayout: React.FC = () => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-slate-900 py-12">
+      {/* Disclaimer Banner */}
+      <section className="bg-slate-100 border-t border-slate-200 py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-3 gap-8 mb-8">
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-amber-600 rounded-lg flex items-center justify-center">
-                  <BookOpen className="w-5 h-5 text-white" />
-                </div>
-                <span className="font-bold text-white">Build Wealth Through Property</span>
-              </div>
-              <p className="text-slate-400 text-sm">
-                A practical seminar on building long-term wealth through property investment, hosted by Chris Ifonlaja.
-              </p>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold text-white mb-4">Event Details</h4>
-              <ul className="space-y-2 text-slate-400 text-sm">
-                <li className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-amber-500" />
-                  Friday, 14 March 2026
-                </li>
-                <li className="flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-amber-500" />
-                  2:00 PM – 4:00 PM
-                </li>
-                <li className="flex items-center gap-2">
-                  <MapPin className="w-4 h-4 text-amber-500" />
-                  Whitla Hall, Methodist College Belfast
-                </li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold text-white mb-4">Quick Links</h4>
-              <ul className="space-y-2">
-                {['About', 'Speakers', 'Includes', 'FAQ'].map((item) => (
-                  <li key={item}>
-                    <button
-                      onClick={() => scrollToSection(item.toLowerCase())}
-                      className="text-slate-400 hover:text-amber-500 text-sm transition-colors flex items-center gap-1"
-                    >
-                      <ChevronRight className="w-4 h-4" />
-                      {item}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-          
-          <div className="border-t border-slate-800 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <p className="text-slate-500 text-sm">
-              © 2026 Build Wealth Through Property. All rights reserved.
-            </p>
-            <div className="flex items-center gap-4">
-              <button className="text-slate-500 hover:text-amber-500 text-sm transition-colors">
-                Privacy Policy
-              </button>
-              <button className="text-slate-500 hover:text-amber-500 text-sm transition-colors">
-                Terms of Service
-              </button>
-            </div>
-          </div>
+          <p className="text-center text-slate-600 text-sm">
+            This website is for informational purposes only. Investment decisions carry risk.{' '}
+            <Link to="/disclaimer" className="text-amber-600 hover:text-amber-700 font-semibold underline">
+              Read full disclaimer
+            </Link>
+          </p>
         </div>
-      </footer>
+      </section>
 
-      {/* Ticket Modal */}
-      <TicketModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      {/* Footer */}
+      <Footer />
       
       {/* Payment Success Modal */}
       {paymentStatus === 'success' && (
@@ -830,15 +907,13 @@ const AppLayout: React.FC = () => {
               Your payment was cancelled. No charges have been made to your account.
             </p>
             <div className="space-y-3">
-              <button
-                onClick={() => {
-                  handleClosePaymentStatus();
-                  setIsModalOpen(true);
-                }}
-                className="w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl font-semibold hover:from-amber-600 hover:to-amber-700 transition-all"
+              <Link
+                to="/booking"
+                onClick={handleClosePaymentStatus}
+                className="w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl font-semibold hover:from-amber-600 hover:to-amber-700 transition-all text-center block"
               >
                 Try Again
-              </button>
+              </Link>
               <button
                 onClick={handleClosePaymentStatus}
                 className="w-full py-3 bg-slate-100 text-slate-700 rounded-xl font-semibold hover:bg-slate-200 transition-all"

@@ -32,7 +32,7 @@ const BookPurchase: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const bookPrice = 19.99; // Book price
+  const bookPrice = 25; // Book price
   const ukShipping = 4.99;
   const ukTotal = bookPrice + ukShipping;
 

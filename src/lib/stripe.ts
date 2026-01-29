@@ -35,6 +35,7 @@ export interface BookCheckoutSessionData {
   address: string;
   city: string;
   postcode: string;
+  quantity: number;
   bookPrice: number;
   shippingPrice: number;
 }
@@ -177,6 +178,7 @@ export async function createBookCheckoutSession(
         address: data.address,
         city: data.city,
         postcode: data.postcode,
+        quantity: data.quantity,
         bookPrice: data.bookPrice,
         shippingPrice: data.shippingPrice,
         successUrl: `${window.location.origin}/payment-success`,

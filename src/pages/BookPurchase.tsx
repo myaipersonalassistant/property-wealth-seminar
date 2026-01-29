@@ -21,6 +21,7 @@ import { Loader2 } from 'lucide-react';
 
 const BookPurchase: React.FC = () => {
   const [selectedOption, setSelectedOption] = useState<'amazon' | 'uk' | null>(null);
+  const [quantity, setQuantity] = useState(1);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -32,9 +33,10 @@ const BookPurchase: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const bookPrice = 25; // Book price
+  const bookPrice = 25; // Book price per unit
   const ukShipping = 4.99;
-  const ukTotal = bookPrice + ukShipping;
+  const bookSubtotal = bookPrice * quantity;
+  const ukTotal = bookSubtotal + ukShipping;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -93,6 +95,7 @@ const BookPurchase: React.FC = () => {
         address: formData.address.trim(),
         city: formData.city.trim(),
         postcode: formData.postcode.trim(),
+        quantity: quantity,
         bookPrice: bookPrice,
         shippingPrice: ukShipping,
       });
@@ -296,6 +299,36 @@ const BookPurchase: React.FC = () => {
 
                         {selectedOption === 'uk' && (
                           <form onSubmit={handleUKOrder} className="mt-6 space-y-4 bg-white rounded-xl p-6 border border-amber-200">
+                            <div className="bg-amber-50 rounded-xl p-4 border border-amber-200 mb-4">
+                              <label className="block text-sm font-semibold text-slate-700 mb-3">
+                                Quantity <span className="text-red-500">*</span>
+                              </label>
+                              <div className="flex items-center gap-4">
+                                <button
+                                  type="button"
+                                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                                  className="w-10 h-10 bg-white border-2 border-amber-300 rounded-lg font-semibold text-amber-600 hover:bg-amber-50 transition-all"
+                                >
+                                  −
+                                </button>
+                                <input
+                                  type="number"
+                                  min="1"
+                                  max="99"
+                                  value={quantity}
+                                  onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                                  className="w-16 px-3 py-2 text-center border-2 border-amber-300 rounded-lg font-semibold text-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => setQuantity(Math.min(99, quantity + 1))}
+                                  className="w-10 h-10 bg-white border-2 border-amber-300 rounded-lg font-semibold text-amber-600 hover:bg-amber-50 transition-all"
+                                >
+                                  +
+                                </button>
+                                <span className="text-slate-600">Books @ £{bookPrice.toFixed(2)} each</span>
+                              </div>
+                            </div>
                             <div className="grid sm:grid-cols-2 gap-4">
                               <div>
                                 <label className="block text-sm font-semibold text-slate-700 mb-2">
@@ -385,10 +418,10 @@ const BookPurchase: React.FC = () => {
                             </div>
                             <div className="bg-slate-50 rounded-xl p-4 border border-slate-200">
                               <div className="flex justify-between items-center mb-2">
-                                <span className="text-slate-600">Book Price</span>
-                                <span className="font-semibold text-slate-800">£{bookPrice.toFixed(2)}</span>
+                                <span className="text-slate-600">{quantity}x Book @ £{bookPrice.toFixed(2)}</span>
+                                <span className="font-semibold text-slate-800">£{bookSubtotal.toFixed(2)}</span>
                               </div>
-                              <p className="text-xs text-slate-500 mb-2">100% of proceeds go to charity</p>
+                              <p className="text-xs text-slate-500 mb-2">100% of book proceeds go to charity</p>
                               <div className="flex justify-between items-center mb-2">
                                 <span className="text-slate-600">UK Shipping</span>
                                 <span className="font-semibold text-slate-800">£{ukShipping.toFixed(2)}</span>

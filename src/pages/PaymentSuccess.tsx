@@ -36,22 +36,50 @@ const PaymentSuccess: React.FC = () => {
   const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showConfetti, setShowConfetti] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   
   const orderRef = searchParams.get('order_ref') || searchParams.get('ref') || searchParams.get('orderRef');
   const sessionId = searchParams.get('session_id') || searchParams.get('sessionId');
+  const isBookPurchase = orderRef?.startsWith('BOOK-');
 
   useEffect(() => {
     const fetchOrderDetails = async () => {
       if (orderRef) {
         try {
           // Small delay to allow webhook to process
-          await new Promise(resolve => setTimeout(resolve, 1500));
+          await new Promise(resolve => setTimeout(resolve, 2000));
           const data = await getTicketPurchase(orderRef);
           if (data) {
+            console.log('Order fetched successfully:', data);
             setOrderDetails(data);
+            setFetchError(null);
+          } else {
+            throw new Error('Order not found');
           }
         } catch (err) {
           console.error('Error fetching order:', err);
+          setFetchError(err instanceof Error ? err.message : 'Failed to fetch order details');
+          
+          // Set default values based on order type for display purposes
+          if (isBookPurchase) {
+            setOrderDetails({
+              customer_name: 'Guest',
+              customer_email: 'Not yet confirmed',
+              quantity: 1,
+              amount_total: 2999, // £29.99 in cents
+              order_reference: orderRef,
+              product_type: 'book',
+            });
+          } else {
+            // For tickets, we don't know the exact quantity, so show a generic message
+            setOrderDetails({
+              customer_name: 'Guest',
+              customer_email: 'Not yet confirmed',
+              quantity: 1,
+              amount_total: 1000, // £10.00 in cents (1 ticket placeholder)
+              order_reference: orderRef,
+            });
+          }
         }
       }
       setIsLoading(false);
@@ -62,9 +90,8 @@ const PaymentSuccess: React.FC = () => {
     // Confetti effect
     const timer = setTimeout(() => setShowConfetti(false), 3000);
     return () => clearTimeout(timer);
-  }, [orderRef]);
+  }, [orderRef, isBookPurchase]);
 
-  const isBookPurchase = orderDetails?.product_type === 'book' || orderRef?.startsWith('BOOK-');
   const isTicketPurchase = !isBookPurchase;
 
   if (isLoading) {
@@ -131,6 +158,13 @@ const PaymentSuccess: React.FC = () => {
 
           {/* Order Details Card */}
           <div className="bg-white rounded-3xl shadow-2xl p-8 sm:p-10 mb-8 border-2 border-green-100">
+            {fetchError && (
+              <div className="bg-amber-50 rounded-xl p-4 mb-6 border border-amber-200">
+                <p className="text-sm text-amber-700">
+                  <strong>Note:</strong> {fetchError}. {isBookPurchase ? 'Showing expected order details.' : 'Your ticket details are being confirmed.'} Please check your email for confirmation.
+                </p>
+              </div>
+            )}
             {/* Order Reference */}
             <div className="bg-gradient-to-r from-amber-50 to-amber-100 rounded-2xl p-6 mb-8 text-center border-2 border-amber-200">
               <p className="text-sm text-amber-700 font-semibold mb-2 uppercase tracking-wide">Order Reference</p>
@@ -167,10 +201,8 @@ const PaymentSuccess: React.FC = () => {
                   )}
                   {isBookPurchase && (
                     <div className="flex justify-between items-center py-2 border-b border-slate-200">
-                      <span className="text-slate-600">Book</span>
-                      <span className="font-semibold text-slate-800">
-                        Build Wealth Through Property
-                      </span>
+                      <span className="text-slate-600">{orderDetails?.quantity || 1}x Build Wealth Through Property</span>
+                      <span className="font-semibold text-slate-800">£{(((orderDetails?.quantity || 1) * 25)).toFixed(2)}</span>
                     </div>
                   )}
                   {isBookPurchase && (
@@ -398,7 +430,7 @@ const PaymentSuccess: React.FC = () => {
                     <div>
                       <h3 className="font-semibold mb-2">Start Learning</h3>
                       <p className="text-slate-300 text-sm">
-                        Once you receive your book, dive into the 7 core principles of property investment.
+                        Once you receive {orderDetails?.quantity && orderDetails.quantity > 1 ? `your ${orderDetails.quantity} books` : 'your book'}, dive into the 7 core principles of property investment.
                       </p>
                     </div>
                   </div>

@@ -97,7 +97,7 @@ const Header: React.FC<HeaderProps> = ({ variant = 'solid', showBookButton = tru
                 onClick={handleBookClick}
                 className="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg font-semibold hover:from-amber-600 hover:to-amber-700 transition-all shadow-lg shadow-amber-500/25"
               >
-                Book Now — £10
+                Book Now — £25
               </button>
             )}
           </div>
@@ -130,7 +130,7 @@ const Header: React.FC<HeaderProps> = ({ variant = 'solid', showBookButton = tru
                 onClick={handleBookClick}
                 className="w-full px-4 py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg font-semibold"
               >
-                Book Now — £10
+                Book Now — £25
               </button>
             )}
           </div>

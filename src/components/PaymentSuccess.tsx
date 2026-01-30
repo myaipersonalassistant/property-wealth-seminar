@@ -77,7 +77,7 @@ const PaymentSuccess: React.FC<PaymentSuccessProps> = ({ sessionId, orderRef, on
               <div className="flex items-center justify-between py-3 border-b border-slate-100">
                 <span className="text-slate-600">Tickets</span>
                 <span className="font-semibold text-slate-800">
-                  {orderDetails.quantity}x @ £10.00
+                  {orderDetails.quantity}x @ £25.00
                 </span>
               </div>
             )}
@@ -104,11 +104,11 @@ const PaymentSuccess: React.FC<PaymentSuccessProps> = ({ sessionId, orderRef, on
               </div>
               <div className="flex items-center gap-3 text-slate-600">
                 <Clock className="w-4 h-4 text-amber-500" />
-                <span>2:00 PM – 4:00 PM (Doors open 1:15 PM)</span>
+                <span>2:00 PM – 5:00 PM (Doors open 1:15 PM)</span>
               </div>
               <div className="flex items-center gap-3 text-slate-600">
                 <MapPin className="w-4 h-4 text-amber-500" />
-                <span>Whitla Hall, Methodist College Belfast</span>
+                <span>Atrium, Methodist College Belfast</span>
               </div>
             </div>
           </div>

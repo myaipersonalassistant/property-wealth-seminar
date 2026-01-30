@@ -76,7 +76,7 @@ const PaymentSuccess: React.FC = () => {
               customer_name: 'Guest',
               customer_email: 'Not yet confirmed',
               quantity: 1,
-              amount_total: 1000, // £10.00 in cents (1 ticket placeholder)
+              amount_total: 2500, // £25.00 in cents (1 ticket placeholder)
               order_reference: orderRef,
             });
           }
@@ -195,14 +195,14 @@ const PaymentSuccess: React.FC = () => {
                     <div className="flex justify-between items-center py-2 border-b border-slate-200">
                       <span className="text-slate-600">Tickets</span>
                       <span className="font-semibold text-slate-800">
-                        {orderDetails.quantity}x @ £10.00
+                        {orderDetails.quantity}x @ £25.00
                       </span>
                     </div>
                   )}
                   {isBookPurchase && (
                     <div className="flex justify-between items-center py-2 border-b border-slate-200">
                       <span className="text-slate-600">{orderDetails?.quantity || 1}x Build Wealth Through Property</span>
-                      <span className="font-semibold text-slate-800">£{(((orderDetails?.quantity || 1) * 25)).toFixed(2)}</span>
+                      <span className="font-semibold text-slate-800">£{(((orderDetails?.quantity || 1) * 19.99)).toFixed(2)}</span>
                     </div>
                   )}
                   {isBookPurchase && (
@@ -244,11 +244,11 @@ const PaymentSuccess: React.FC = () => {
                       </div>
                       <div className="flex items-center gap-3 text-slate-600">
                         <Clock className="w-4 h-4 text-amber-500" />
-                        <span>2:00 PM – 4:00 PM (Doors open 1:15 PM)</span>
+                        <span>2:00 PM – 5:00 PM (Doors open 1:15 PM)</span>
                       </div>
                       <div className="flex items-center gap-3 text-slate-600">
                         <MapPin className="w-4 h-4 text-amber-500" />
-                        <span>Whitla Hall, Methodist College Belfast</span>
+                        <span>Atrium, Methodist College Belfast</span>
                       </div>
                     </>
                   ) : (

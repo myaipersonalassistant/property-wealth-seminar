@@ -27,8 +27,12 @@ const App = () => (
             <Route path="/disclaimer" element={<Disclaimer />} />
             <Route path="/booking" element={<Booking />} />
             <Route path="/book" element={<BookPurchase />} />
+            {/* Payment success routes - support both /payment-success and /success */}
             <Route path="/payment-success" element={<PaymentSuccess />} />
+            <Route path="/success" element={<PaymentSuccess />} />
+            {/* Payment cancelled routes - support both /payment-cancelled and /cancelled */}
             <Route path="/payment-cancelled" element={<PaymentCancelled />} />
+            <Route path="/cancelled" element={<PaymentCancelled />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

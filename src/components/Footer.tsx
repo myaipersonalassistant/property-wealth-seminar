@@ -49,11 +49,11 @@ const Footer: React.FC = () => {
               </li>
               <li className="flex items-center gap-2">
                 <Clock className="w-4 h-4 text-amber-500" />
-                2:00 PM – 4:00 PM
+                2:00 PM – 5:00 PM
               </li>
               <li className="flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-amber-500" />
-                Whitla Hall, Methodist College Belfast
+                Atrium, Methodist College Belfast
               </li>
             </ul>
           </div>

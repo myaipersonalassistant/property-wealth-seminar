@@ -18,6 +18,12 @@
 const STRIPE_PUBLISHABLE_KEY = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || '';
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3001';
 
+// Debug logging
+console.log('🔧 Stripe Config:', {
+  hasPublishableKey: !!STRIPE_PUBLISHABLE_KEY,
+  apiBase: API_BASE,
+});
+
 export interface CheckoutSessionData {
   name: string;
   email: string;
@@ -55,18 +61,31 @@ export async function createCheckoutSession(
       throw new Error('Stripe publishable key is not configured');
     }
 
-    const response = await fetch(`${API_BASE}/api/create-checkout-session`, {
+    const endpoint = `${API_BASE}/api/create-checkout-session`;
+    const payload = {
+      customerName: data.name,
+      customerEmail: data.email,
+      customerPhone: data.phone || '',
+      quantity: data.quantity,
+      productType: 'ticket',
+    };
+
+    console.log('🎫 Creating ticket checkout session:', {
+      endpoint,
+      payload,
+    });
+
+    const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        customerName: data.name,
-        customerEmail: data.email,
-        customerPhone: data.phone || '',
-        quantity: data.quantity,
-        productType: 'ticket', // ← Added this
-      }),
+      body: JSON.stringify(payload),
+    });
+
+    console.log('📥 Response status:', response.status);
+    console.log('📥 Response headers:', {
+      contentType: response.headers.get('content-type'),
     });
 
     // Check if response is ok first
@@ -80,11 +99,13 @@ export async function createCheckoutSession(
           errorMessage = errorData.error || errorMessage;
         } catch (e) {
           const text = await response.text();
+          console.error('❌ Error response (text):', text);
           errorMessage = text || errorMessage;
         }
       } else {
         const text = await response.text();
-        errorMessage = text || errorMessage;
+        console.error('❌ Error response (HTML/text):', text);
+        errorMessage = `Server returned HTML instead of JSON. This usually means the endpoint doesn't exist. Endpoint: ${endpoint}. Response: ${text}`;
       }
       
       throw new Error(errorMessage);
@@ -94,13 +115,15 @@ export async function createCheckoutSession(
     const contentType = response.headers.get('content-type');
     if (!contentType || !contentType.includes('application/json')) {
       const text = await response.text();
-      throw new Error(`Expected JSON response but got: ${text || 'empty response'}. API_BASE: ${API_BASE}`);
+      console.error('❌ Expected JSON but got:', text);
+      throw new Error(`Expected JSON response but got: ${text || 'empty response'}. Endpoint: ${endpoint}`);
     }
     
     const result = await response.json();
+    console.log('✅ Checkout session created:', result);
     return result;
   } catch (error) {
-    console.error('Error creating checkout session:', error);
+    console.error('❌ Error creating checkout session:', error);
     return {
       error: error instanceof Error ? error.message : 'Failed to create checkout session',
     };
@@ -118,21 +141,34 @@ export async function createBookCheckoutSession(
       throw new Error('Stripe publishable key is not configured');
     }
 
-    const response = await fetch(`${API_BASE}/api/create-checkout-session`, {
+    const endpoint = `${API_BASE}/api/create-checkout-session`;
+    const payload = {
+      customerName: data.name,
+      customerEmail: data.email,
+      customerPhone: data.phone || '',
+      address: data.address,
+      city: data.city,
+      postcode: data.postcode,
+      quantity: data.quantity,
+      productType: 'book',
+    };
+
+    console.log('📚 Creating book checkout session:', {
+      endpoint,
+      payload,
+    });
+
+    const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        customerName: data.name,
-        customerEmail: data.email,
-        customerPhone: data.phone || '',
-        address: data.address,
-        city: data.city,
-        postcode: data.postcode,
-        quantity: data.quantity,
-        productType: 'book', // ← Added this
-      }),
+      body: JSON.stringify(payload),
+    });
+
+    console.log('📥 Response status:', response.status);
+    console.log('📥 Response headers:', {
+      contentType: response.headers.get('content-type'),
     });
 
     // Check if response is ok first
@@ -146,11 +182,13 @@ export async function createBookCheckoutSession(
           errorMessage = errorData.error || errorMessage;
         } catch (e) {
           const text = await response.text();
+          console.error('❌ Error response (text):', text);
           errorMessage = text || errorMessage;
         }
       } else {
         const text = await response.text();
-        errorMessage = text || errorMessage;
+        console.error('❌ Error response (HTML/text):', text);
+        errorMessage = `Server returned HTML instead of JSON. This usually means the endpoint doesn't exist. Endpoint: ${endpoint}. Response: ${text}`;
       }
       
       throw new Error(errorMessage);
@@ -160,13 +198,15 @@ export async function createBookCheckoutSession(
     const contentType = response.headers.get('content-type');
     if (!contentType || !contentType.includes('application/json')) {
       const text = await response.text();
-      throw new Error(`Expected JSON response but got: ${text || 'empty response'}. API_BASE: ${API_BASE}`);
+      console.error('❌ Expected JSON but got:', text);
+      throw new Error(`Expected JSON response but got: ${text || 'empty response'}. Endpoint: ${endpoint}`);
     }
     
     const result = await response.json();
+    console.log('✅ Book checkout session created:', result);
     return result;
   } catch (error) {
-    console.error('Error creating book checkout session:', error);
+    console.error('❌ Error creating book checkout session:', error);
     return {
       error: error instanceof Error ? error.message : 'Failed to create checkout session',
     };

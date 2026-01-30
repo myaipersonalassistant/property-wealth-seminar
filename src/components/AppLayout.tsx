@@ -33,7 +33,7 @@ const images = {
   host: './profile.jpg',
   book: './fina.JPG',
   venue: 'https://d64gsuwffb70l.cloudfront.net/697242eb29a6a04fc9873637_1769096061879_b13955d3.jpg',
-  chrisDolan: 'https://d64gsuwffb70l.cloudfront.net/697242eb29a6a04fc9873637_1769096087877_ca812ae1.jpg',
+  chrisDolan: './dolan.jpg',
   lewisMills: 'https://d64gsuwffb70l.cloudfront.net/697242eb29a6a04fc9873637_1769096105352_c9c5ee9c.jpg',
   ruth: 'https://d64gsuwffb70l.cloudfront.net/697242eb29a6a04fc9873637_1769096246566_9c2b8eef.jpg',
   raymond: 'https://d64gsuwffb70l.cloudfront.net/697242eb29a6a04fc9873637_1769096270790_4b94378e.png',
@@ -101,7 +101,7 @@ const reasons = [
 ];
 
 const ticketIncludes = [
-  'Full 2-hour property wealth seminar',
+  'Full 3-hour property wealth seminar',
   'Expert panel discussion with industry professionals',
   'Live audience Q&A session',
   'Free downloadable investor tools and checklists',
@@ -197,7 +197,7 @@ const AppLayout: React.FC = () => {
                 to="/booking"
                 className="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg font-semibold hover:from-amber-600 hover:to-amber-700 transition-all shadow-lg shadow-amber-500/25"
               >
-                Book Now — £10
+                Book Now — £25
               </Link>
             </div>
             
@@ -229,7 +229,7 @@ const AppLayout: React.FC = () => {
                 onClick={() => setIsMenuOpen(false)}
                 className="w-full px-4 py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg font-semibold text-center block"
               >
-                Book Now — £10
+                Book Now — £25
               </Link>
             </div>
           </div>
@@ -277,7 +277,7 @@ const AppLayout: React.FC = () => {
                   className="group px-8 py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl font-semibold text-lg hover:from-amber-600 hover:to-amber-700 transition-all shadow-xl shadow-amber-500/30 flex items-center justify-center gap-2"
                 >
                   <Ticket className="w-5 h-5" />
-                  Book Your Seat — £10
+                  Book Your Seat — £25
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </Link>
                 <Link
@@ -312,7 +312,7 @@ const AppLayout: React.FC = () => {
                     to="/book"
                     className="px-6 py-2.5 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/30 text-white rounded-lg font-semibold text-sm transition-all inline-block"
                   >
-                    Buy the Book
+                    Buy the Book - £19.99
                   </Link>
                 </div>
                 <div className="space-y-4">
@@ -331,7 +331,7 @@ const AppLayout: React.FC = () => {
                     </div>
                     <div>
                       <p className="text-slate-400 text-sm">Time</p>
-                      <p className="font-semibold">2:00 PM – 4:00 PM</p>
+                      <p className="font-semibold">2:00 PM – 5:00 PM</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-4 text-white">
@@ -340,7 +340,7 @@ const AppLayout: React.FC = () => {
                     </div>
                     <div>
                       <p className="text-slate-400 text-sm">Venue</p>
-                      <p className="font-semibold">Whitla Hall, Methodist College Belfast</p>
+                      <p className="font-semibold">Atrium, Methodist College Belfast</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-4 text-white">
@@ -378,17 +378,17 @@ const AppLayout: React.FC = () => {
             <div className="bg-slate-50 rounded-xl p-4">
               <Clock className="w-6 h-6 text-amber-600 mb-2" />
               <p className="text-xs text-slate-500">Time</p>
-              <p className="font-semibold text-slate-800 text-sm">2:00 – 4:00 PM</p>
+              <p className="font-semibold text-slate-800 text-sm">2:00 – 5:00 PM</p>
             </div>
             <div className="bg-slate-50 rounded-xl p-4">
               <MapPin className="w-6 h-6 text-amber-600 mb-2" />
               <p className="text-xs text-slate-500">Venue</p>
-              <p className="font-semibold text-slate-800 text-sm">Whitla Hall, Belfast</p>
+              <p className="font-semibold text-slate-800 text-sm">Atrium, Belfast</p>
             </div>
             <div className="bg-slate-50 rounded-xl p-4">
               <Ticket className="w-6 h-6 text-amber-600 mb-2" />
               <p className="text-xs text-slate-500">Price</p>
-              <p className="font-semibold text-slate-800 text-sm">£10 per ticket</p>
+              <p className="font-semibold text-slate-800 text-sm">£25 per ticket</p>
             </div>
           </div>
         </div>
@@ -484,7 +484,7 @@ const AppLayout: React.FC = () => {
                 >
                   <BookOpen className="w-5 h-5" />
                   Purchase the Book
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" /> £19.99
                 </Link>
               </div>
               <div className="mt-8 flex flex-wrap gap-4">
@@ -559,7 +559,7 @@ const AppLayout: React.FC = () => {
                 What's Included
               </span>
               <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6">
-                Your £10 Ticket Gives You Access To
+                Your £25 Ticket Gives You Access To
               </h2>
               <div className="space-y-4">
                 {ticketIncludes.map((item, index) => (
@@ -594,12 +594,12 @@ const AppLayout: React.FC = () => {
             <div className="relative">
               <img 
                 src={images.venue}
-                alt="Whitla Hall Venue"
+                alt="Atrium Venue"
                 className="rounded-2xl shadow-2xl"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent rounded-2xl" />
               <div className="absolute bottom-6 left-6 right-6">
-                <p className="text-white font-semibold text-lg">Whitla Hall</p>
+                <p className="text-white font-semibold text-lg">Atrium</p>
                 <p className="text-slate-300">Methodist College Belfast</p>
               </div>
             </div>
@@ -810,7 +810,7 @@ const AppLayout: React.FC = () => {
               className="group px-10 py-5 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl font-semibold text-lg hover:from-amber-600 hover:to-amber-700 transition-all shadow-xl shadow-amber-500/30 flex items-center justify-center gap-3"
             >
               <Ticket className="w-6 h-6" />
-              Book Your Seat — £10
+              Book Your Seat — £25
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
             <Link
@@ -830,7 +830,7 @@ const AppLayout: React.FC = () => {
             </div>
             <div className="flex items-center gap-2">
               <Clock className="w-5 h-5 text-amber-500" />
-              <span>2:00 PM – 4:00 PM</span>
+              <span>2:00 PM – 5:00 PM</span>
             </div>
             <div className="flex items-center gap-2">
               <MapPin className="w-5 h-5 text-amber-500" />

@@ -32,7 +32,7 @@ const Booking: React.FC = () => {
     phone: '',
   });
   
-  const ticketPrice = 10;
+  const ticketPrice = 25;
   const total = quantity * ticketPrice;
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -138,7 +138,7 @@ const Booking: React.FC = () => {
                       </div>
                       <div>
                         <p className="text-slate-400 text-xs">Time</p>
-                        <p className="font-semibold">2:00 PM – 4:00 PM</p>
+                        <p className="font-semibold">2:00 PM – 5:00 PM</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3 text-white">
@@ -147,7 +147,7 @@ const Booking: React.FC = () => {
                       </div>
                       <div>
                         <p className="text-slate-400 text-xs">Venue</p>
-                        <p className="font-semibold text-sm">Whitla Hall, Methodist College Belfast</p>
+                        <p className="font-semibold text-sm">Atrium, Methodist College Belfast</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3 text-white">
@@ -156,7 +156,7 @@ const Booking: React.FC = () => {
                       </div>
                       <div>
                         <p className="text-slate-400 text-xs">Price</p>
-                        <p className="font-semibold">£10 per ticket</p>
+                        <p className="font-semibold">£25 per ticket</p>
                       </div>
                     </div>
                   </div>
@@ -164,7 +164,7 @@ const Booking: React.FC = () => {
                   <div className="pt-6 border-t border-slate-700">
                     <div className="flex items-start gap-3 text-slate-300 text-sm">
                       <CheckCircle2 className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
-                      <p>Full 2-hour property wealth seminar</p>
+                      <p>Full 3-hour property wealth seminar</p>
                     </div>
                     <div className="flex items-start gap-3 text-slate-300 text-sm mt-3">
                       <CheckCircle2 className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />

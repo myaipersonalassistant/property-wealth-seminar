@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Check, Calendar, Clock, MapPin, Download, Mail, Ticket, ArrowRight, Loader2 } from 'lucide-react';
-import { getTicketPurchase } from '@/lib/google-sheets';
+import { getTicketPurchase } from '@/lib/firestore';
 
 interface PaymentSuccessProps {
   sessionId: string | null;

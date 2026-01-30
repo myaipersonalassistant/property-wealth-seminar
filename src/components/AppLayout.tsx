@@ -34,7 +34,7 @@ const images = {
   book: './fina.JPG',
   venue: 'https://d64gsuwffb70l.cloudfront.net/697242eb29a6a04fc9873637_1769096061879_b13955d3.jpg',
   chrisDolan: './dolan.jpg',
-  lewisMills: 'https://d64gsuwffb70l.cloudfront.net/697242eb29a6a04fc9873637_1769096105352_c9c5ee9c.jpg',
+  lewisMills: './lewis.png',
   ruth: 'https://d64gsuwffb70l.cloudfront.net/697242eb29a6a04fc9873637_1769096246566_9c2b8eef.jpg',
   raymond: 'https://d64gsuwffb70l.cloudfront.net/697242eb29a6a04fc9873637_1769096270790_4b94378e.png',
   accountant: 'https://d64gsuwffb70l.cloudfront.net/697242eb29a6a04fc9873637_1769096290851_eaec5242.png',
@@ -53,7 +53,7 @@ const panelists = [
     name: 'Lewis Mills',
     role: 'Mortgage Adviser',
     image: images.lewisMills,
-    description: 'Guidance on mortgage affordability, interest-rate risk, and financing strategies for investors.'
+    description: 'A Belfast-based mortgage adviser specializing in everything from first-time buyers to experienced buy-to-let investors. With access to lenders across the UK, he provides expert guidance on mortgage affordability, interest rate risk, and tailored financing strategies to help clients make confident property investment decisions.'
   },
   {
     name: 'Ruth',

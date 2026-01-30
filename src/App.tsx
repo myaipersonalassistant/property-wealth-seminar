@@ -12,6 +12,9 @@ import BookPurchase from "./pages/BookPurchase";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentCancelled from "./pages/PaymentCancelled";
 import NotFound from "./pages/NotFound";
+import AdminLogin from "./pages/AdminLogin";
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminRouteGuard from "./components/AdminRouteGuard";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +36,32 @@ const App = () => (
             {/* Payment cancelled routes - support both /payment-cancelled and /cancelled */}
             <Route path="/payment-cancelled" element={<PaymentCancelled />} />
             <Route path="/cancelled" element={<PaymentCancelled />} />
+            {/* Admin routes */}
+            <Route
+              path="/admin/login"
+              element={
+                <AdminRouteGuard requireAuth={false}>
+                  <AdminLogin />
+                </AdminRouteGuard>
+              }
+            />
+            <Route
+              path="/admin/dashboard"
+              element={
+                <AdminRouteGuard requireAuth={true}>
+                  <AdminDashboard />
+                </AdminRouteGuard>
+              }
+            />
+            {/* Catch-all for other admin routes - redirect to dashboard if authenticated, login if not */}
+            <Route
+              path="/admin/*"
+              element={
+                <AdminRouteGuard requireAuth={true}>
+                  <AdminDashboard />
+                </AdminRouteGuard>
+              }
+            />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

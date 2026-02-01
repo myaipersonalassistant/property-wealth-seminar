@@ -66,7 +66,7 @@ const PaymentSuccess: React.FC = () => {
               customer_name: 'Guest',
               customer_email: 'Not yet confirmed',
               quantity: 1,
-              amount_total: 2999, // £29.99 in cents
+              amount_total: 1999, // £19.99 in cents
               order_reference: orderRef,
               product_type: 'book',
             });
@@ -203,12 +203,6 @@ const PaymentSuccess: React.FC = () => {
                     <div className="flex justify-between items-center py-2 border-b border-slate-200">
                       <span className="text-slate-600">{orderDetails?.quantity || 1}x Build Wealth Through Property</span>
                       <span className="font-semibold text-slate-800">£{(((orderDetails?.quantity || 1) * 19.99)).toFixed(2)}</span>
-                    </div>
-                  )}
-                  {isBookPurchase && (
-                    <div className="flex justify-between items-center py-2 border-b border-slate-200">
-                      <span className="text-slate-600">UK Shipping</span>
-                      <span className="font-semibold text-slate-800">£4.99</span>
                     </div>
                   )}
                   <div className="flex justify-between items-center pt-2">

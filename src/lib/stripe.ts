@@ -41,7 +41,6 @@ export interface BookCheckoutSessionData {
   postcode: string;
   quantity: number;
   bookPrice: number;
-  shippingPrice: number;
 }
 
 export interface CheckoutSessionResponse {

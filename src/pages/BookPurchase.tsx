@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { 
-  BookOpen, 
   ShoppingCart, 
   Package, 
   Globe, 
@@ -33,10 +32,10 @@ const BookPurchase: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const bookPrice = 19.99; // Book price per unit
-  const ukShipping = 4.99;
+
+  const bookPrice = 19.99;
   const bookSubtotal = bookPrice * quantity;
-  const ukTotal = bookSubtotal + ukShipping;
+  const ukTotal = bookSubtotal;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -97,7 +96,6 @@ const BookPurchase: React.FC = () => {
         postcode: formData.postcode.trim(),
         quantity: quantity,
         bookPrice: bookPrice,
-        shippingPrice: ukShipping,
       });
 
       if (result.error) {
@@ -288,10 +286,6 @@ const BookPurchase: React.FC = () => {
                             <span>Physical copy</span>
                           </div>
                           <div className="flex items-center gap-2 text-sm text-slate-600">
-                            <Truck className="w-4 h-4 text-amber-500" />
-                            <span>UK shipping: £{ukShipping.toFixed(2)}</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-sm text-slate-600">
                             <Heart className="w-4 h-4 text-rose-500" />
                             <span>100% to charity</span>
                           </div>
@@ -422,10 +416,6 @@ const BookPurchase: React.FC = () => {
                                 <span className="font-semibold text-slate-800">£{bookSubtotal.toFixed(2)}</span>
                               </div>
                               <p className="text-xs text-slate-500 mb-2">100% of book proceeds go to charity</p>
-                              <div className="flex justify-between items-center mb-2">
-                                <span className="text-slate-600">UK Shipping</span>
-                                <span className="font-semibold text-slate-800">£{ukShipping.toFixed(2)}</span>
-                              </div>
                               <div className="pt-2 border-t border-slate-300 flex justify-between items-center">
                                 <span className="font-bold text-slate-800">Total</span>
                                 <span className="text-xl font-bold text-amber-600">£{ukTotal.toFixed(2)}</span>

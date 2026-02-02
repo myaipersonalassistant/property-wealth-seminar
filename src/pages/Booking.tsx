@@ -147,7 +147,7 @@ const Booking: React.FC = () => {
                       </div>
                       <div>
                         <p className="text-slate-400 text-xs">Venue</p>
-                        <p className="font-semibold text-sm">Atrium, Methodist College Belfast</p>
+                        <p className="font-semibold text-sm">Europa Hotel, Great Victoria Street, Belfast BT2 7AP</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3 text-white">

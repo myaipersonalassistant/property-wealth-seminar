@@ -53,7 +53,7 @@ const Footer: React.FC = () => {
               </li>
               <li className="flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-amber-500" />
-                Atrium, Methodist College Belfast
+                Europa Hotel, Great Victoria Street, Belfast BT2 7AP
               </li>
             </ul>
           </div>

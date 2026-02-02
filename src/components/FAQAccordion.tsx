@@ -21,7 +21,7 @@ const faqs: FAQItem[] = [
   },
   {
     question: "Is parking available at the venue?",
-    answer: "Yes, parking is available at or near Methodist College Belfast. Please arrive early to allow time for registration and finding a parking space."
+    answer: "Yes, parking is available at the venue and in nearby areas. We recommend arriving early to allow sufficient time for registration and securing a parking space."
   },
   {
     question: "Can I get a refund if I can't attend?",

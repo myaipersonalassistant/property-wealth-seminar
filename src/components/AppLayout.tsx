@@ -32,9 +32,9 @@ import { Link } from 'react-router-dom';
 const images = {
   host: './profile.jpg',
   book: './fina.JPG',
-  venue: 'https://d64gsuwffb70l.cloudfront.net/697242eb29a6a04fc9873637_1769096061879_b13955d3.jpg',
+  venue: 'https://www.europahotelbelfast.com/wp-content/uploads/2021/10/exterior_europa-hotel-376.jpg',
   chrisDolan: './dolan.jpg',
-  lewisMills: './lewis.png',
+  lewisMills: './lewis.jpg',
   ruth: 'https://d64gsuwffb70l.cloudfront.net/697242eb29a6a04fc9873637_1769096246566_9c2b8eef.jpg',
   raymond: 'https://d64gsuwffb70l.cloudfront.net/697242eb29a6a04fc9873637_1769096270790_4b94378e.png',
   accountant: 'https://d64gsuwffb70l.cloudfront.net/697242eb29a6a04fc9873637_1769096290851_eaec5242.png',
@@ -272,28 +272,25 @@ const AppLayout: React.FC = () => {
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 mb-10">
-                <div className="flex flex-col items-center sm:items-start">
-                  <Link
-                    to="/booking"
-                    className="group px-8 py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl font-semibold text-lg hover:from-amber-600 hover:to-amber-700 transition-all shadow-xl shadow-amber-500/30 flex items-center justify-center gap-2"
-                  >
-                    <Ticket className="w-5 h-5" />
-                    Book Your Seat — £25
-                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                  </Link>
-                  <span className="text-white/70 text-sm mt-2">(All Proceeds to Charity)</span>
-                </div>
-                <div className="flex flex-col items-center sm:items-start">
-                  <Link
-                    to="/book"
-                    className="group px-8 py-4 bg-white/10 backdrop-blur-sm border border-white/20 text-white rounded-xl font-semibold hover:bg-white/20 transition-all flex items-center justify-center gap-2"
-                  >
-                    <BookOpen className="w-5 h-5" />
-                    Buy the Book
-                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                  </Link>
-                </div>
+                <Link
+                  to="/booking"
+                  className="group w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl font-semibold text-lg hover:from-amber-600 hover:to-amber-700 transition-all shadow-xl shadow-amber-500/30 flex items-center justify-center gap-2"
+                >
+                  <Ticket className="w-5 h-5" />
+                  Book Your Seat — £25
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </Link>
+                <Link
+                  to="/book"
+                  className="group w-full sm:w-auto px-8 py-4 bg-white/10 backdrop-blur-sm border border-white/20 text-white rounded-xl font-semibold hover:bg-white/20 transition-all flex items-center justify-center gap-2"
+                >
+                  <BookOpen className="w-5 h-5" />
+                  Buy the Book
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </Link>
+                <span className="text-cyan-200 text-sm text-center sm:hidden">All Proceeds to Charity</span>
               </div>
+              <span className="hidden sm:block text-cyan-200 text-sm -mt-6 mb-10 text-center">All Proceeds to Charity</span>
               
               {/* Countdown Timer */}
               <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
@@ -345,7 +342,7 @@ const AppLayout: React.FC = () => {
                     </div>
                     <div>
                       <p className="text-slate-400 text-sm">Venue</p>
-                      <p className="font-semibold">Atrium, Methodist College Belfast</p>
+                      <p className="font-semibold">Europa Hotel, Great Victoria Street, Belfast BT2 7AP</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-4 text-white">
@@ -599,13 +596,13 @@ const AppLayout: React.FC = () => {
             <div className="relative">
               <img 
                 src={images.venue}
-                alt="Atrium Venue"
+                alt="Europa Hotel"
                 className="rounded-2xl shadow-2xl"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent rounded-2xl" />
               <div className="absolute bottom-6 left-6 right-6">
-                <p className="text-white font-semibold text-lg">Atrium</p>
-                <p className="text-slate-300">Methodist College Belfast</p>
+                <p className="text-white font-semibold text-lg">Europa Hotel</p>
+                <p className="text-slate-300">Great Victoria Street, Belfast BT2 7AP</p>
               </div>
             </div>
           </div>

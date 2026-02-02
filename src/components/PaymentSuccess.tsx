@@ -108,7 +108,7 @@ const PaymentSuccess: React.FC<PaymentSuccessProps> = ({ sessionId, orderRef, on
               </div>
               <div className="flex items-center gap-3 text-slate-600">
                 <MapPin className="w-4 h-4 text-amber-500" />
-                <span>Atrium, Methodist College Belfast</span>
+                <span>Europa Hotel, Great Victoria Street, Belfast BT2 7AP</span>
               </div>
             </div>
           </div>

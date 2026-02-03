@@ -137,7 +137,7 @@ const BookPurchase: React.FC = () => {
                   <div className="text-center mb-6">
                     <div className="w-32 h-48 mx-auto mb-4 rounded-lg shadow-2xl overflow-hidden">
                       <img 
-                        src="./fina.JPG"
+                        src="./marketing.jpg"
                         alt="Build Wealth Through Property Book"
                         className="w-full h-full object-cover"
                       />

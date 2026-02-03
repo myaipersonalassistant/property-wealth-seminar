@@ -65,8 +65,8 @@ try {
   throw error;
 }
 
-// Export db for use in other modules
-export { db };
+// Export db and app for use in other modules
+export { db, app };
 
 const COLLECTION_NAME = 'ticket_purchases';
 

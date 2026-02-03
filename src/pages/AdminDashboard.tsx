@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import {
   Ticket,
   BookOpen,
@@ -11,7 +10,6 @@ import {
   Package,
   LogOut,
   Search,
-  Filter,
   Download,
   RefreshCw,
   CheckCircle2,
@@ -20,11 +18,10 @@ import {
   Truck,
   Mail,
   Phone,
-  MapPin,
   Eye,
-  Edit,
   X,
-  Home
+  Home,
+  BarChart2
 } from 'lucide-react';
 import { getAllTicketPurchases, TicketPurchase, updateTicketPurchase } from '@/lib/firestore';
 import { getCurrentAdmin, logoutAdmin } from '@/lib/admin-auth';
@@ -175,7 +172,14 @@ const AdminDashboard: React.FC = () => {
                 className="flex items-center gap-2 px-4 py-2 text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors"
               >
                 <Home className="w-4 h-4" />
-                Home
+                Site
+              </Link>
+              <Link
+                to="/admin/metrics"
+                className="hidden sm:flex items-center gap-2 px-4 py-2 text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors"
+              >
+                <BarChart2 className="w-4 h-4" />
+                Metrics
               </Link>
               <button
                 onClick={handleLogout}

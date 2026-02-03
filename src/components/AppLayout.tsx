@@ -27,11 +27,12 @@ import PanelCard from './PanelCard';
 import ReasonCard from './ReasonCard';
 import Footer from './Footer';
 import { Link } from 'react-router-dom';
+import { trackEvent, trackPageView } from '@/lib/analytics';
 
 // Image URLs
 const images = {
   host: './profile.jpg',
-  book: './fina.JPG',
+  book: './marketing.jpg',
   venue: 'https://www.europahotelbelfast.com/wp-content/uploads/2021/10/exterior_europa-hotel-376.jpg',
   chrisDolan: './dolan.jpg',
   lewisMills: './lewis.jpg',
@@ -142,6 +143,15 @@ const AppLayout: React.FC = () => {
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+  
+  // Track landing page view once per visit
+  useEffect(() => {
+    try {
+      trackPageView('Home', window.location.pathname || '/');
+    } catch (e) {
+      // analytics is non-critical; fail silently
+    }
   }, []);
   
   // Handle hash navigation from other pages
@@ -274,6 +284,7 @@ const AppLayout: React.FC = () => {
               <div className="flex flex-col sm:flex-row gap-4 mb-10">
                 <Link
                   to="/booking"
+                  onClick={() => trackEvent('home_book_cta_click')}
                   className="group w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl font-semibold text-lg hover:from-amber-600 hover:to-amber-700 transition-all shadow-xl shadow-amber-500/30 flex items-center justify-center gap-2"
                 >
                   <Ticket className="w-5 h-5" />
@@ -282,6 +293,7 @@ const AppLayout: React.FC = () => {
                 </Link>
                 <Link
                   to="/book"
+                  onClick={() => trackEvent('home_book_page_cta_click')}
                   className="group w-full sm:w-auto px-8 py-4 bg-white/10 backdrop-blur-sm border border-white/20 text-white rounded-xl font-semibold hover:bg-white/20 transition-all flex items-center justify-center gap-2"
                 >
                   <BookOpen className="w-5 h-5" />

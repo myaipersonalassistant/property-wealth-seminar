@@ -198,7 +198,7 @@ const BookPurchase: React.FC = () => {
                 {/* Purchase Options */}
                 <div className="space-y-6 mb-8">
                   {/* Amazon Option */}
-                  <div
+                  {/* <div
                     onClick={() => setSelectedOption('amazon')}
                     className={`cursor-pointer rounded-xl p-6 border-2 transition-all ${
                       selectedOption === 'amazon'
@@ -248,7 +248,7 @@ const BookPurchase: React.FC = () => {
                         </button>
                       </div>
                     </div>
-                  </div>
+                  </div> */}
 
                   {/* UK Physical Book Option */}
                   <div

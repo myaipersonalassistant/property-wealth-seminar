@@ -613,10 +613,12 @@ const AppLayout: React.FC = () => {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent rounded-2xl" />
               <div className="absolute bottom-6 left-6 right-6">
+                <p className="text-amber-400 text-sm font-semibold uppercase tracking-wider mb-1">Venue</p>
                 <p className="text-white font-semibold text-lg">Europa Hotel</p>
                 <p className="text-slate-300">Great Victoria Street, Belfast BT2 7AP</p>
               </div>
             </div>
+            
           </div>
         </div>
       </section>

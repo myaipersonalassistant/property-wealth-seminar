@@ -36,7 +36,6 @@ const images = {
   venue: 'https://www.europahotelbelfast.com/wp-content/uploads/2021/10/exterior_europa-hotel-376.jpg',
   chrisDolan: './dolan.jpg',
   lewisMills: './lewis.jpg',
-  ruth: 'https://d64gsuwffb70l.cloudfront.net/697242eb29a6a04fc9873637_1769096246566_9c2b8eef.jpg',
   raymond: 'https://d64gsuwffb70l.cloudfront.net/697242eb29a6a04fc9873637_1769096270790_4b94378e.png',
   accountant: 'https://d64gsuwffb70l.cloudfront.net/697242eb29a6a04fc9873637_1769096290851_eaec5242.png',
   charity: 'https://d64gsuwffb70l.cloudfront.net/697242eb29a6a04fc9873637_1769096316988_a7dbb4e1.jpg',
@@ -55,12 +54,6 @@ const panelists = [
     role: 'Mortgage Adviser',
     image: images.lewisMills,
     description: 'A Belfast-based mortgage adviser specializing in everything from first-time buyers to experienced buy-to-let investors. With access to lenders across the UK, he provides expert guidance on mortgage affordability, interest rate risk, and tailored financing strategies to help clients make confident property investment decisions.'
-  },
-  {
-    name: 'Ruth',
-    role: 'Property Investor',
-    image: images.ruth,
-    description: 'Real-world investing experiences, lessons learned, and practical portfolio building strategies.'
   },
   {
     name: '',

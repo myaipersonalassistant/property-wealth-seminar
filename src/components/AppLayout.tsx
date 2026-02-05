@@ -390,7 +390,7 @@ const AppLayout: React.FC = () => {
             <div className="bg-slate-50 rounded-xl p-4">
               <MapPin className="w-6 h-6 text-amber-600 mb-2" />
               <p className="text-xs text-slate-500">Venue</p>
-              <p className="font-semibold text-slate-800 text-sm">Atrium, Belfast</p>
+              <p className="font-semibold text-slate-800 text-sm">Europa Hotel, Great Victoria Street, Belfast BT2 7AP</p>
             </div>
             <div className="bg-slate-50 rounded-xl p-4">
               <Ticket className="w-6 h-6 text-amber-600 mb-2" />
@@ -868,3 +868,4 @@ const AppLayout: React.FC = () => {
 };
 
 export default AppLayout;
+

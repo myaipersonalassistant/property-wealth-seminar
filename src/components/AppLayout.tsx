@@ -380,7 +380,7 @@ const AppLayout: React.FC = () => {
             <div className="bg-slate-50 rounded-xl p-4">
               <Calendar className="w-6 h-6 text-amber-600 mb-2" />
               <p className="text-xs text-slate-500">Date</p>
-              <p className="font-semibold text-slate-800 text-sm">Fri, 14 March</p>
+              <p className="font-semibold text-slate-800 text-sm">Sat, 14 March</p>
             </div>
             <div className="bg-slate-50 rounded-xl p-4">
               <Clock className="w-6 h-6 text-amber-600 mb-2" />
@@ -868,4 +868,5 @@ const AppLayout: React.FC = () => {
 };
 
 export default AppLayout;
+
 

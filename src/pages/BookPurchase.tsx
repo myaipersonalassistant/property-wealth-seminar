@@ -447,7 +447,7 @@ const BookPurchase: React.FC = () => {
 
                 <div className="bg-blue-50 rounded-xl p-6 border border-blue-200">
                   <p className="text-sm text-blue-800">
-                    <strong>Note:</strong> You can also purchase the book at the event on Friday, 14 March 2026. 
+                    <strong>Note:</strong> You can also purchase the book at the event on Saturday, 14 March 2026. 
                     All proceeds from event sales go directly to Place of Victory Charity.
                   </p>
                 </div>

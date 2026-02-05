@@ -129,7 +129,7 @@ const Booking: React.FC = () => {
                       </div>
                       <div>
                         <p className="text-slate-400 text-xs">Date</p>
-                        <p className="font-semibold">Friday, 14 March 2026</p>
+                        <p className="font-semibold">Saturday, 14 March 2026</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3 text-white">

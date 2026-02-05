@@ -45,7 +45,7 @@ const Footer: React.FC = () => {
             <ul className="space-y-2 text-slate-400 text-sm">
               <li className="flex items-center gap-2">
                 <Calendar className="w-4 h-4 text-amber-500" />
-                Friday, 14 March 2026
+                Saturday, 14 March 2026
               </li>
               <li className="flex items-center gap-2">
                 <Clock className="w-4 h-4 text-amber-500" />

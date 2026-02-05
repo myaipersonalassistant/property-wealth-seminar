@@ -100,7 +100,7 @@ const PaymentSuccess: React.FC<PaymentSuccessProps> = ({ sessionId, orderRef, on
             <div className="space-y-2 text-sm">
               <div className="flex items-center gap-3 text-slate-600">
                 <Calendar className="w-4 h-4 text-amber-500" />
-                <span>Friday, 14 March 2026</span>
+                <span>Saturday, 14 March 2026</span>
               </div>
               <div className="flex items-center gap-3 text-slate-600">
                 <Clock className="w-4 h-4 text-amber-500" />

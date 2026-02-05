@@ -256,7 +256,7 @@ const AppLayout: React.FC = () => {
             <div>
               <div className="inline-flex items-center gap-2 bg-amber-500/20 backdrop-blur-sm border border-amber-500/30 rounded-full px-4 py-2 mb-6">
                 <Calendar className="w-4 h-4 text-amber-400" />
-                <span className="text-amber-200 text-sm font-medium">Friday, 14 March 2026 • Belfast</span>
+                <span className="text-amber-200 text-sm font-medium">Saturday, 14 March 2026 • Belfast</span>
               </div>
               
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6">
@@ -329,7 +329,7 @@ const AppLayout: React.FC = () => {
                     </div>
                     <div>
                       <p className="text-slate-400 text-sm">Date</p>
-                      <p className="font-semibold">Friday, 14 March 2026</p>
+                      <p className="font-semibold">Saturday, 14 March 2026</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-4 text-white">
@@ -835,7 +835,7 @@ const AppLayout: React.FC = () => {
           <div className="flex flex-wrap justify-center gap-6 text-slate-400">
             <div className="flex items-center gap-2">
               <Calendar className="w-5 h-5 text-amber-500" />
-              <span>Friday, 14 March 2026</span>
+              <span>Saturday, 14 March 2026</span>
             </div>
             <div className="flex items-center gap-2">
               <Clock className="w-5 h-5 text-amber-500" />

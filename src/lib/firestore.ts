@@ -29,6 +29,12 @@ export interface TicketPurchase {
   shipping_postcode?: string;
   created_at: string;
   updated_at: string;
+  // Email tracking fields
+  email_sent?: boolean;
+  email_sent_at?: string;
+  email_sent_count?: number;
+  email_last_attempt?: string;
+  email_status?: 'pending' | 'sent' | 'failed';
 }
 
 // Firebase configuration from environment variables
@@ -106,6 +112,11 @@ function docToTicketPurchase(docData: any, id: string): TicketPurchase {
     shipping_postcode: docData.shipping_postcode,
     created_at: timestampToISO(docData.created_at),
     updated_at: timestampToISO(docData.updated_at),
+    email_sent: docData.email_sent || false,
+    email_sent_at: docData.email_sent_at ? timestampToISO(docData.email_sent_at) : undefined,
+    email_sent_count: docData.email_sent_count || 0,
+    email_last_attempt: docData.email_last_attempt ? timestampToISO(docData.email_last_attempt) : undefined,
+    email_status: docData.email_status || 'pending',
   };
 }
 

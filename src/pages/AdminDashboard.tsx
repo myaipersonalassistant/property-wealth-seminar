@@ -21,7 +21,9 @@ import {
   Eye,
   X,
   Home,
-  BarChart2
+  BarChart2,
+  Send,
+  AlertCircle
 } from 'lucide-react';
 import { getAllTicketPurchases, TicketPurchase, updateTicketPurchase } from '@/lib/firestore';
 import { getCurrentAdmin, logoutAdmin } from '@/lib/admin-auth';
@@ -38,6 +40,8 @@ const AdminDashboard: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedOrder, setSelectedOrder] = useState<TicketPurchase | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const [emailStatus, setEmailStatus] = useState<{ [key: string]: 'sending' | 'success' | 'error' }>({});
 
   useEffect(() => {
     const currentAdmin = getCurrentAdmin();
@@ -116,7 +120,9 @@ const AdminDashboard: React.FC = () => {
 
   // Calculate statistics
   const stats = {
-    totalRevenue: orders.reduce((sum, o) => sum + (o.amount_total || 0), 0),
+    totalRevenue: orders
+      .filter(o => o.status === 'completed')
+      .reduce((sum, o) => sum + (o.amount_total || 0), 0),
     totalTickets: orders.filter(o => o.product_type !== 'book').reduce((sum, o) => sum + o.quantity, 0),
     totalBooks: orders.filter(o => o.product_type === 'book').reduce((sum, o) => sum + o.quantity, 0),
     totalOrders: orders.length,
@@ -124,10 +130,57 @@ const AdminDashboard: React.FC = () => {
     completedOrders: orders.filter(o => o.status === 'completed').length,
     ticketOrders: orders.filter(o => o.product_type !== 'book').length,
     bookOrders: orders.filter(o => o.product_type === 'book').length,
+    emailsSent: orders.filter(o => o.email_sent === true).length,
+    emailsPending: orders.filter(o => o.status === 'completed' && (!o.email_sent || o.email_status === 'pending')).length,
+    emailsFailed: orders.filter(o => o.email_status === 'failed').length,
+  };
+
+  const handleSendEmail = async (orderRef: string) => {
+    try {
+      setIsSendingEmail(true);
+      setEmailStatus({ ...emailStatus, [orderRef]: 'sending' });
+      
+      const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3001';
+      const response = await fetch(`${API_BASE}/api/send-email/${orderRef}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to send email');
+      }
+
+      const result = await response.json();
+      setEmailStatus({ ...emailStatus, [orderRef]: 'success' });
+      
+      // Reload orders to get updated email status
+      await loadOrders();
+      
+      // Clear success status after 3 seconds
+      setTimeout(() => {
+        setEmailStatus({ ...emailStatus, [orderRef]: undefined as any });
+      }, 3000);
+      
+      alert(`Email sent successfully to ${result.message.split('to ')[1]}`);
+    } catch (error: any) {
+      console.error('Error sending email:', error);
+      setEmailStatus({ ...emailStatus, [orderRef]: 'error' });
+      alert(error.message || 'Failed to send email. Please try again.');
+      
+      // Clear error status after 5 seconds
+      setTimeout(() => {
+        setEmailStatus({ ...emailStatus, [orderRef]: undefined as any });
+      }, 5000);
+    } finally {
+      setIsSendingEmail(false);
+    }
   };
 
   const exportToCSV = () => {
-    const headers = ['Order Reference', 'Type', 'Customer Name', 'Email', 'Phone', 'Quantity', 'Amount', 'Status', 'Date'];
+    const headers = ['Order Reference', 'Type', 'Customer Name', 'Email', 'Phone', 'Quantity', 'Amount', 'Status', 'Email Status', 'Email Sent Count', 'Date'];
     const rows = filteredOrders.map(o => [
       o.order_reference,
       o.product_type === 'book' ? 'Book' : 'Ticket',
@@ -137,6 +190,8 @@ const AdminDashboard: React.FC = () => {
       o.quantity.toString(),
       `£${(o.amount_total / 100).toFixed(2)}`,
       o.status,
+      o.email_sent ? 'Sent' : (o.email_status === 'failed' ? 'Failed' : 'Pending'),
+      (o.email_sent_count || 0).toString(),
       new Date(o.created_at).toLocaleDateString(),
     ]);
 
@@ -235,6 +290,45 @@ const AdminDashboard: React.FC = () => {
             <p className="text-amber-100 text-xs mt-1">
               {stats.completedOrders} completed, {stats.pendingOrders} pending
             </p>
+          </div>
+        </div>
+
+        {/* Email Statistics */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                <Mail className="w-6 h-6 text-green-600" />
+              </div>
+              <CheckCircle2 className="w-5 h-5 text-green-500" />
+            </div>
+            <p className="text-slate-600 text-sm mb-1">Emails Sent</p>
+            <p className="text-2xl font-bold text-slate-800">{stats.emailsSent}</p>
+            <p className="text-xs text-slate-500 mt-1">Successfully delivered</p>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
+                <Clock className="w-6 h-6 text-amber-600" />
+              </div>
+              <AlertCircle className="w-5 h-5 text-amber-500" />
+            </div>
+            <p className="text-slate-600 text-sm mb-1">Emails Pending</p>
+            <p className="text-2xl font-bold text-slate-800">{stats.emailsPending}</p>
+            <p className="text-xs text-slate-500 mt-1">Awaiting delivery</p>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                <XCircle className="w-6 h-6 text-red-600" />
+              </div>
+              <AlertCircle className="w-5 h-5 text-red-500" />
+            </div>
+            <p className="text-slate-600 text-sm mb-1">Email Failures</p>
+            <p className="text-2xl font-bold text-slate-800">{stats.emailsFailed}</p>
+            <p className="text-xs text-slate-500 mt-1">Requires attention</p>
           </div>
         </div>
 
@@ -342,6 +436,7 @@ const AdminDashboard: React.FC = () => {
                     <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Quantity</th>
                     <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Amount</th>
                     <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Email</th>
                     <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Date</th>
                     <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Actions</th>
                   </tr>
@@ -392,6 +487,33 @@ const AdminDashboard: React.FC = () => {
                           {order.status === 'failed' && <XCircle className="w-3 h-3" />}
                           {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                         </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {order.status === 'completed' ? (
+                          <div className="flex items-center gap-2">
+                            {order.email_sent ? (
+                              <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                                <CheckCircle2 className="w-3 h-3" />
+                                Sent
+                              </span>
+                            ) : order.email_status === 'failed' ? (
+                              <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
+                                <XCircle className="w-3 h-3" />
+                                Failed
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
+                                <Clock className="w-3 h-3" />
+                                Pending
+                              </span>
+                            )}
+                            {order.email_sent_count > 0 && (
+                              <span className="text-xs text-slate-500">({order.email_sent_count}x)</span>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-xs text-slate-400">N/A</span>
+                        )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
                         {new Date(order.created_at).toLocaleDateString()}
@@ -511,6 +633,109 @@ const AdminDashboard: React.FC = () => {
                   </div>
                 </div>
               </div>
+
+              {/* Email Status */}
+              {selectedOrder.status === 'completed' && (
+                <div>
+                  <h3 className="font-semibold text-slate-800 mb-3 flex items-center gap-2">
+                    <Mail className="w-5 h-5 text-amber-600" />
+                    Email Status
+                  </h3>
+                  <div className="bg-slate-50 rounded-xl p-4 space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-600">Email Status</span>
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        selectedOrder.email_sent
+                          ? 'bg-green-100 text-green-700'
+                          : selectedOrder.email_status === 'failed'
+                          ? 'bg-red-100 text-red-700'
+                          : 'bg-amber-100 text-amber-700'
+                      }`}>
+                        {selectedOrder.email_sent ? (
+                          <>
+                            <CheckCircle2 className="w-3 h-3 inline mr-1" />
+                            Sent
+                          </>
+                        ) : selectedOrder.email_status === 'failed' ? (
+                          <>
+                            <XCircle className="w-3 h-3 inline mr-1" />
+                            Failed
+                          </>
+                        ) : (
+                          <>
+                            <Clock className="w-3 h-3 inline mr-1" />
+                            Pending
+                          </>
+                        )}
+                      </span>
+                    </div>
+                    {selectedOrder.email_sent_at && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-600">Last Sent</span>
+                        <span className="text-slate-800 text-sm">
+                          {new Date(selectedOrder.email_sent_at).toLocaleString()}
+                        </span>
+                      </div>
+                    )}
+                    {selectedOrder.email_sent_count > 0 && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-600">Send Count</span>
+                        <span className="text-slate-800 font-semibold">{selectedOrder.email_sent_count}</span>
+                      </div>
+                    )}
+                    {selectedOrder.email_last_attempt && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-600">Last Attempt</span>
+                        <span className="text-slate-800 text-sm">
+                          {new Date(selectedOrder.email_last_attempt).toLocaleString()}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Send Email Button */}
+                  <div className="mt-4">
+                    <button
+                      onClick={() => handleSendEmail(selectedOrder.order_reference)}
+                      disabled={isSendingEmail || emailStatus[selectedOrder.order_reference] === 'sending'}
+                      className={`w-full px-4 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 ${
+                        emailStatus[selectedOrder.order_reference] === 'success'
+                          ? 'bg-green-500 text-white hover:bg-green-600'
+                          : emailStatus[selectedOrder.order_reference] === 'error'
+                          ? 'bg-red-500 text-white hover:bg-red-600'
+                          : 'bg-blue-500 text-white hover:bg-blue-600'
+                      } disabled:opacity-50 disabled:cursor-not-allowed`}
+                    >
+                      {emailStatus[selectedOrder.order_reference] === 'sending' ? (
+                        <>
+                          <RefreshCw className="w-4 h-4 animate-spin" />
+                          Sending Email...
+                        </>
+                      ) : emailStatus[selectedOrder.order_reference] === 'success' ? (
+                        <>
+                          <CheckCircle2 className="w-4 h-4" />
+                          Email Sent Successfully!
+                        </>
+                      ) : emailStatus[selectedOrder.order_reference] === 'error' ? (
+                        <>
+                          <XCircle className="w-4 h-4" />
+                          Failed - Try Again
+                        </>
+                      ) : (
+                        <>
+                          <Send className="w-4 h-4" />
+                          {selectedOrder.email_sent ? 'Resend Confirmation Email' : 'Send Confirmation Email'}
+                        </>
+                      )}
+                    </button>
+                    <p className="text-xs text-slate-500 mt-2 text-center">
+                      {selectedOrder.email_sent 
+                        ? 'Click to resend the confirmation email to the customer'
+                        : 'Send the confirmation email for this completed order'}
+                    </p>
+                  </div>
+                </div>
+              )}
 
               {/* Status Update */}
               <div>

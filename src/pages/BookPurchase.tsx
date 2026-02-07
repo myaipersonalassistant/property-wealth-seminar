@@ -155,7 +155,7 @@ const BookPurchase: React.FC = () => {
                     </div>
                     <div className="flex items-start gap-3 text-slate-700 text-sm">
                       <CheckCircle2 className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-                      <p>Real-world experience and practical insights</p>
+                      <p>Real-life experience and practical insights</p>
                     </div>
                     <div className="flex items-start gap-3 text-slate-700 text-sm">
                       <CheckCircle2 className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />

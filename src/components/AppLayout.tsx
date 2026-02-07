@@ -11,10 +11,7 @@ import {
   ArrowRight,
   Menu,
   X,
-  ChevronRight,
   Star,
-  Download,
-  MessageCircle,
   Gift,
   Target,
   Briefcase,
@@ -66,7 +63,7 @@ const panelists = [
 const reasons = [
   {
     title: 'Multiple Pathways to Wealth',
-    description: "Property isn't one strategy — it's a system with options that creates resilience and choice."
+    description: "Property isn't one strategy — it's a system with options that create resilience and choice."
   },
   {
     title: 'Predictable, Repeatable Income',
@@ -429,7 +426,7 @@ const AppLayout: React.FC = () => {
             <div className="md:col-span-2 lg:col-span-3">
               <div className="bg-gradient-to-r from-slate-800 to-slate-900 rounded-2xl p-8 text-center">
                 <p className="text-slate-300 text-lg mb-4">
-                  Each principle is explained using real-world experience — including mistakes, lessons learned, and practical examples — so attendees can apply the ideas responsibly and sustainably.
+                  Each principle is explained using real-life experience — including mistakes, lessons learned, and practical examples — so attendees can apply the ideas responsibly and sustainably.
                 </p>
                 <p className="text-amber-400 font-semibold mb-4">
                   This is not a get-rich-quick talk. It is a grounded, experience-based session.
@@ -475,10 +472,10 @@ const AppLayout: React.FC = () => {
               </p>
               <div className="space-y-4 text-slate-600 leading-relaxed">
                 <p>
-                  Chris is a property investor, community leader, and author of <em className="text-slate-800 font-medium">Build Wealth Through Property 7 Reasons Why</em>. His journey includes both successful investments and difficult seasons shaped by market downturns, tenant challenges, and financing pressures.
+                  Chris is a property investor, community leader, and author of <em className="text-slate-800 font-medium">Build Wealth Through Property: 7 Reasons Why</em>. His journey includes both successful investments and difficult seasons shaped by market downturns, tenant challenges, and financing pressures.
                 </p>
                 <p>
-                  Through this seminar and his book, Chris shares not only strategies, but also the importance of stewardship, discipline, and long-term thinking in building wealth that lasts. The book is available for purchase at the event, with all proceeds supporting Place of Victory Charity.
+                  Through this seminar and his book, Chris shares not only strategies, but also the importance of stewardship, discipline, and long-term thinking in building wealth that lasts. The book is available for purchase at the event, with all proceeds from the event supporting Place of Victory charity's community hub building project.
                 </p>
                 <p>
                   His wider mission is to combine financial education with community transformation, helping individuals grow while also strengthening the communities around them.
@@ -524,7 +521,7 @@ const AppLayout: React.FC = () => {
               Learn From Industry Professionals
             </h2>
             <p className="text-slate-600 text-lg leading-relaxed">
-              Following the main teaching session, attendees will hear from a panel of local property professionals who bring practical insight from different stages of the property journey.
+              Following the main talk, attendees will hear from a panel of local property professionals who bring practical insight from different stages of the property journey.
             </p>
           </div>
           
@@ -542,7 +539,7 @@ const AppLayout: React.FC = () => {
               {[
                 'Buying and selling in the current market',
                 'Mortgage affordability and interest-rate risk',
-                'Real-world investing experiences',
+                'Real-life investing experiences',
                 'Legal responsibilities and eviction realities',
                 'Tax planning and portfolio structure',
                 'Building a sustainable property portfolio'
@@ -642,7 +639,7 @@ const AppLayout: React.FC = () => {
               <div className="space-y-4 text-slate-600 leading-relaxed mb-8">
                 <p>
                   This comprehensive book explores the seven core reasons why property remains one of the most 
-                  reliable paths to building long-term wealth. Written from real-world experience, it provides 
+                  reliable paths to building long-term wealth. Written from real-life experience, it provides 
                   practical insights, lessons learned, and actionable strategies for both beginners and experienced 
                   investors.
                 </p>

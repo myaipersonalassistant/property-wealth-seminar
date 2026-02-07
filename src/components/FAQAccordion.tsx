@@ -9,7 +9,7 @@ interface FAQItem {
 const faqs: FAQItem[] = [
   {
     question: "Is this suitable for beginners?",
-    answer: "Yes. The content is designed to be clear, practical, and accessible, even if you have never invested in property before. Chris explains each concept from the ground up with real-world examples."
+    answer: "Yes. The content is designed to be clear, practical, and accessible, even if you have never invested in property before. Chris explains each concept from the ground up with real-life examples."
   },
   {
     question: "Will I be able to ask questions?",
@@ -17,11 +17,11 @@ const faqs: FAQItem[] = [
   },
   {
     question: "Will the book be available at the event?",
-    answer: "Yes. The book will be available for purchase on the day, and all book proceeds will go to Place of Victory Charity to support their community programmes."
+    answer: "Yes. The book will be available for purchase on the day. All ticket and book proceeds will go to Place of Victory Charity to support their community programmes."
   },
   {
     question: "Is parking available at the venue?",
-    answer: "Yes, parking is available at the venue and in nearby areas. We recommend arriving early to allow sufficient time for registration and securing a parking space."
+    answer: "Yes, parking is available. The venue has a paid parking lot (rates apply), and free street parking may be available in nearby areas on a first-come, first-served basis. We recommend arriving early to secure your spot and allow time for registration."
   },
   {
     question: "Can I get a refund if I can't attend?",

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Check, Calendar, Clock, MapPin, Download, Mail, Ticket, ArrowRight, Loader2 } from 'lucide-react';
-import { getTicketPurchase } from '@/lib/firestore';
+import { fetchOrder } from '@/lib/api';
 
 interface PaymentSuccessProps {
   sessionId: string | null;
@@ -24,7 +24,7 @@ const PaymentSuccess: React.FC<PaymentSuccessProps> = ({ sessionId, orderRef, on
     const fetchOrderDetails = async () => {
       if (orderRef) {
         try {
-          const data = await getTicketPurchase(orderRef);
+          const data = await fetchOrder(orderRef);
           if (data) {
             setOrderDetails(data);
           }

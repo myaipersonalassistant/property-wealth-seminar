@@ -23,25 +23,30 @@ import {
   Home,
   BarChart2,
   Send,
-  AlertCircle
+  AlertCircle,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
-import { getAllTicketPurchases, TicketPurchase, updateTicketPurchase } from '@/lib/firestore';
+import { fetchAllOrders, updateOrder, sendOrderEmail, type Order } from '@/lib/api';
 import { getCurrentAdmin, logoutAdmin } from '@/lib/admin-auth';
 import { formatCurrency } from '@/lib/stripe';
+
+const PAGE_SIZE = 10;
 
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [admin, setAdmin] = useState<any>(null);
-  const [orders, setOrders] = useState<TicketPurchase[]>([]);
-  const [filteredOrders, setFilteredOrders] = useState<TicketPurchase[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'all' | 'tickets' | 'books'>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedOrder, setSelectedOrder] = useState<TicketPurchase | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [emailStatus, setEmailStatus] = useState<{ [key: string]: 'sending' | 'success' | 'error' }>({});
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     const currentAdmin = getCurrentAdmin();
@@ -56,15 +61,19 @@ const AdminDashboard: React.FC = () => {
   const loadOrders = async () => {
     try {
       setIsLoading(true);
-      const data = await getAllTicketPurchases();
-      // Sort by created_at descending (newest first)
-      const sorted = data.sort((a, b) => 
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      const data = await fetchAllOrders();
+      // API returns sorted; ensure consistent shape
+      const sorted = (Array.isArray(data) ? data : []).sort((a, b) =>
+        new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
       );
       setOrders(sorted);
       setFilteredOrders(sorted);
     } catch (error) {
       console.error('Error loading orders:', error);
+      if (error instanceof Error && error.message === 'Unauthorized') {
+        logoutAdmin();
+        navigate('/admin/login');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -97,12 +106,13 @@ const AdminDashboard: React.FC = () => {
     }
 
     setFilteredOrders(filtered);
+    setCurrentPage(1);
   }, [orders, activeTab, statusFilter, searchQuery]);
 
   const handleStatusUpdate = async (orderRef: string, newStatus: 'pending' | 'completed' | 'failed') => {
     try {
       setIsUpdating(true);
-      await updateTicketPurchase(orderRef, { status: newStatus });
+      await updateOrder(orderRef, { status: newStatus });
       await loadOrders();
       setSelectedOrder(null);
     } catch (error) {
@@ -139,21 +149,8 @@ const AdminDashboard: React.FC = () => {
     try {
       setIsSendingEmail(true);
       setEmailStatus({ ...emailStatus, [orderRef]: 'sending' });
-      
-      const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3001';
-      const response = await fetch(`${API_BASE}/api/send-email/${orderRef}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to send email');
-      }
-
-      const result = await response.json();
+      const result = await sendOrderEmail(orderRef);
       setEmailStatus({ ...emailStatus, [orderRef]: 'success' });
       
       // Reload orders to get updated email status
@@ -165,10 +162,10 @@ const AdminDashboard: React.FC = () => {
       }, 3000);
       
       alert(`Email sent successfully to ${result.message.split('to ')[1]}`);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error sending email:', error);
       setEmailStatus({ ...emailStatus, [orderRef]: 'error' });
-      alert(error.message || 'Failed to send email. Please try again.');
+      alert(error instanceof Error ? error.message : 'Failed to send email. Please try again.');
       
       // Clear error status after 5 seconds
       setTimeout(() => {
@@ -178,6 +175,15 @@ const AdminDashboard: React.FC = () => {
       setIsSendingEmail(false);
     }
   };
+
+  // Pagination
+  const totalPages = Math.max(1, Math.ceil(filteredOrders.length / PAGE_SIZE));
+  const paginatedOrders = filteredOrders.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE,
+  );
+  const startIndex = (currentPage - 1) * PAGE_SIZE + 1;
+  const endIndex = Math.min(currentPage * PAGE_SIZE, filteredOrders.length);
 
   const exportToCSV = () => {
     const headers = ['Order Reference', 'Type', 'Customer Name', 'Email', 'Phone', 'Quantity', 'Amount', 'Status', 'Email Status', 'Email Sent Count', 'Date'];
@@ -442,7 +448,7 @@ const AdminDashboard: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200">
-                  {filteredOrders.map((order) => (
+                  {paginatedOrders.map((order) => (
                     <tr key={order.order_reference} className="hover:bg-slate-50 transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="font-mono text-sm font-semibold text-slate-800">{order.order_reference}</div>
@@ -530,6 +536,70 @@ const AdminDashboard: React.FC = () => {
                   ))}
                 </tbody>
               </table>
+            </div>
+          )}
+
+          {/* Pagination */}
+          {!isLoading && filteredOrders.length > 0 && (
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 border-t border-slate-200 bg-slate-50">
+              <p className="text-sm text-slate-600">
+                Showing <span className="font-medium">{startIndex}</span> to{' '}
+                <span className="font-medium">{endIndex}</span> of{' '}
+                <span className="font-medium">{filteredOrders.length}</span> orders
+              </p>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage <= 1}
+                  className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                  Previous
+                </button>
+                <span className="flex items-center gap-1">
+                  {(() => {
+                    const pages: number[] = [];
+                    if (totalPages <= 7) {
+                      for (let i = 1; i <= totalPages; i++) pages.push(i);
+                    } else {
+                      pages.push(1);
+                      const start = Math.max(2, currentPage - 1);
+                      const end = Math.min(totalPages - 1, currentPage + 1);
+                      if (start > 2) pages.push(-1); // ellipsis
+                      for (let i = start; i <= end; i++) {
+                        if (!pages.includes(i)) pages.push(i);
+                      }
+                      if (end < totalPages - 1) pages.push(-2); // ellipsis
+                      if (totalPages > 1) pages.push(totalPages);
+                    }
+                    return pages.map((p) =>
+                      p < 0 ? (
+                        <span key={p} className="px-2 text-slate-400">…</span>
+                      ) : (
+                        <button
+                          key={p}
+                          onClick={() => setCurrentPage(p)}
+                          className={`min-w-[2rem] px-2 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                            currentPage === p
+                              ? 'bg-amber-500 text-white'
+                              : 'text-slate-700 hover:bg-slate-200'
+                          }`}
+                        >
+                          {p}
+                        </button>
+                      ),
+                    );
+                  })()}
+                </span>
+                <button
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage >= totalPages}
+                  className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  Next
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           )}
         </div>

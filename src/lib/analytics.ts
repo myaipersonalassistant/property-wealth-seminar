@@ -129,12 +129,37 @@ async function storePageView(pageName: string, pagePath: string) {
   }
 }
 
-// Store event in Firestore
+const EVENT_THROTTLE_MS = 60_000; // Skip duplicate same event from same visitor within 60s
+const EVENT_THROTTLE_KEY = 'analytics_event_last';
+
+function shouldThrottleEvent(eventName: string): boolean {
+  try {
+    const key = `${EVENT_THROTTLE_KEY}_${eventName}`;
+    const last = sessionStorage.getItem(key);
+    if (!last) return false;
+    const lastMs = parseInt(last, 10);
+    if (isNaN(lastMs)) return false;
+    return Date.now() - lastMs < EVENT_THROTTLE_MS;
+  } catch {
+    return false;
+  }
+}
+
+function markEventWritten(eventName: string): void {
+  try {
+    sessionStorage.setItem(`${EVENT_THROTTLE_KEY}_${eventName}`, String(Date.now()));
+  } catch {
+    /* ignore */
+  }
+}
+
+// Store event in Firestore (throttled: same event from same visitor within 60s = 1 write)
 async function storeEvent(eventName: string, eventParams?: Record<string, any>) {
+  if (shouldThrottleEvent(eventName)) return;
   try {
     const now = Timestamp.now();
     const visitorId = getOrCreateVisitorId();
-    
+
     await setDoc(doc(db, EVENTS_COLLECTION, `${Date.now()}-${Math.random()}`), {
       event_name: eventName,
       event_params: eventParams || {},
@@ -143,6 +168,7 @@ async function storeEvent(eventName: string, eventParams?: Record<string, any>) 
       date: new Date().toISOString().split('T')[0],
       hour: new Date().getHours(),
     });
+    markEventWritten(eventName);
   } catch (error) {
     console.error('Error storing event:', error);
   }

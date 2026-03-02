@@ -15,13 +15,13 @@ import {
 } from 'lucide-react';
 import { getCurrentAdmin, logoutAdmin } from '@/lib/admin-auth';
 import {
-  EventData,
-  PageViewData,
-  VisitorData,
-  getAllVisitors,
-  getEvents,
-  getPageViews,
-} from '@/lib/analytics';
+  fetchPageViews,
+  fetchVisitors,
+  fetchEvents,
+  type PageViewData,
+  type VisitorData,
+  type EventData,
+} from '@/lib/api';
 import {
   Area,
   AreaChart,
@@ -83,9 +83,9 @@ const AdminMetrics: React.FC = () => {
       }
 
       const [viewsData, visitorsData, eventsData] = await Promise.all([
-        getPageViews(startDate, endDate),
-        getAllVisitors(),
-        getEvents(startDate, endDate),
+        fetchPageViews(startDate, endDate),
+        fetchVisitors(),
+        fetchEvents(startDate, endDate),
       ]);
 
       setPageViews(viewsData);
@@ -93,6 +93,10 @@ const AdminMetrics: React.FC = () => {
       setEvents(eventsData);
     } catch (error) {
       console.error('Error loading analytics:', error);
+      if (error instanceof Error && error.message === 'Unauthorized') {
+        logoutAdmin();
+        navigate('/admin/login');
+      }
     } finally {
       setIsLoading(false);
     }

@@ -15,7 +15,7 @@ import {
   Heart
 } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { getTicketPurchase } from '@/lib/firestore';
+import { fetchOrder } from '@/lib/api';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
@@ -48,7 +48,7 @@ const PaymentSuccess: React.FC = () => {
         try {
           // Small delay to allow webhook to process
           await new Promise(resolve => setTimeout(resolve, 2000));
-          const data = await getTicketPurchase(orderRef);
+          const data = await fetchOrder(orderRef);
           if (data) {
             console.log('Order fetched successfully:', data);
             setOrderDetails(data);

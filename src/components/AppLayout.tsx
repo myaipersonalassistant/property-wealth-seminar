@@ -345,8 +345,9 @@ const AppLayout: React.FC = () => {
               <div className="bg-white/10 backdrop-blur-md rounded-3xl p-8 border border-white/20">
                 <img 
                   src={images.book} 
-                  alt="Build Wealth Through Property Book"
+                  alt="Build Wealth Through Property Book - 7 Reasons Why Real Estate Builds Wealth"
                   className="w-48 mx-auto mb-6 rounded-lg shadow-2xl"
+                  loading="lazy"
                 />
                 <div className="text-center mb-6">
                   <p className="text-white font-semibold text-lg mb-2">Available Now</p>

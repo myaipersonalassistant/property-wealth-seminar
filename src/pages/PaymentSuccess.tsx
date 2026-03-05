@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import SEO from '@/components/SEO';
 import { 
   CheckCircle2, 
   Calendar, 
@@ -110,6 +111,13 @@ const PaymentSuccess: React.FC = () => {
   }
 
   return (
+    <>
+      <SEO
+        title="Payment Successful"
+        description="Thank you for your order. Your Build Wealth Through Property seminar ticket or book purchase has been confirmed."
+        canonical="/payment-success"
+        noindex
+      />
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 flex flex-col relative overflow-hidden">
       {/* Confetti Effect */}
       {showConfetti && (
@@ -437,6 +445,7 @@ const PaymentSuccess: React.FC = () => {
 
       <Footer />
     </div>
+    </>
   );
 };
 

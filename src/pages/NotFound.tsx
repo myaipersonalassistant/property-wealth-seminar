@@ -1,6 +1,7 @@
 import { useLocation, Link } from "react-router-dom";
 import { useEffect } from "react";
 import { Home, ArrowLeft, Search, BookOpen, Ticket } from "lucide-react";
+import SEO from "@/components/SEO";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
@@ -15,6 +16,8 @@ const NotFound = () => {
   }, [location.pathname]);
 
   return (
+    <>
+      <SEO title="Page Not Found" description="The page you're looking for doesn't exist. Return to the homepage or book your seminar ticket." noindex />
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 flex flex-col mt-20">
       <Header variant="solid" showBookButton={false} />
       
@@ -109,6 +112,7 @@ const NotFound = () => {
 
       <Footer />
     </div>
+    </>
   );
 };
 

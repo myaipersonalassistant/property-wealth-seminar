@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import SEO from '@/components/SEO';
 import { 
   Ticket, 
   User, 
@@ -93,6 +94,13 @@ const Booking: React.FC = () => {
   };
 
   return (
+    <>
+      <SEO
+        title="Book Tickets"
+        description="Reserve your seat for the Build Wealth Through Property seminar. £25 per ticket. Europa Hotel Belfast, Saturday 14 March 2026. Expert panel, live Q&A, and networking."
+        canonical="/booking"
+        jsonLdEvent
+      />
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 flex flex-col">
       <Header variant="solid" showBookButton={false} />
       
@@ -344,6 +352,7 @@ const Booking: React.FC = () => {
 
       <Footer />
     </div>
+    </>
   );
 };
 

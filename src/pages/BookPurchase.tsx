@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import SEO from '@/components/SEO';
 import { 
   ShoppingCart, 
   Package, 
@@ -115,6 +116,12 @@ const BookPurchase: React.FC = () => {
   };
 
   return (
+    <>
+      <SEO
+        title="Buy the Book"
+        description="Purchase 'Build Wealth Through Property' by Chris Ifonlaja. £19.99. 100% of proceeds go to Place of Victory Charity. Order online or buy at the seminar."
+        canonical="/book"
+      />
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 flex flex-col">
       <Header variant="solid" showBookButton={false} />
       
@@ -138,8 +145,10 @@ const BookPurchase: React.FC = () => {
                     <div className="w-32 h-48 mx-auto mb-4 rounded-lg shadow-2xl overflow-hidden">
                       <img 
                         src="./marketing.jpg"
-                        alt="Build Wealth Through Property Book"
+                        alt="Build Wealth Through Property Book by Chris Ifonlaja - 7 Reasons Why Real Estate Builds Wealth"
                         className="w-full h-full object-cover"
+                        width={128}
+                        height={192}
                       />
                     </div>
                     <h2 className="text-xl font-bold text-slate-800 mb-2">
@@ -459,6 +468,7 @@ const BookPurchase: React.FC = () => {
 
       <Footer />
     </div>
+    </>
   );
 };
 

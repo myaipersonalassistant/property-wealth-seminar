@@ -1,10 +1,17 @@
 import React from 'react';
 import { BookOpen, AlertTriangle } from 'lucide-react';
+import SEO from '@/components/SEO';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
 const Disclaimer: React.FC = () => {
   return (
+    <>
+      <SEO
+        title="Disclaimer"
+        description="Important information regarding the Build Wealth Through Property seminar, book purchases, and property investment. Read our terms and disclaimers."
+        canonical="/disclaimer"
+      />
     <div className="min-h-screen bg-slate-50 flex flex-col">
       <Header variant="solid" showBookButton={true} />
       
@@ -185,6 +192,7 @@ const Disclaimer: React.FC = () => {
 
       <Footer />
     </div>
+    </>
   );
 };
 

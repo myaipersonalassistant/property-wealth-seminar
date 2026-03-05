@@ -1,4 +1,5 @@
 import React from 'react';
+import SEO from '@/components/SEO';
 import { 
   XCircle, 
   ArrowLeft, 
@@ -15,6 +16,13 @@ import Footer from '@/components/Footer';
 
 const PaymentCancelled: React.FC = () => {
   return (
+    <>
+      <SEO
+        title="Payment Cancelled"
+        description="Your payment was cancelled. No charges were made. Return to book your seminar ticket or purchase the book."
+        canonical="/payment-cancelled"
+        noindex
+      />
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 flex flex-col">
       <Header variant="solid" showBookButton={false} />
       
@@ -172,6 +180,7 @@ const PaymentCancelled: React.FC = () => {
 
       <Footer />
     </div>
+    </>
   );
 };
 

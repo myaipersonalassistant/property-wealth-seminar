@@ -242,6 +242,13 @@ const AdminDashboard: React.FC = () => {
                 <BarChart2 className="w-4 h-4" />
                 Metrics
               </Link>
+              <Link
+                to="/admin/leads"
+                className="hidden sm:flex items-center gap-2 px-4 py-2 text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors"
+              >
+                <Users className="w-4 h-4" />
+                Leads
+              </Link>
               <button
                 onClick={handleLogout}
                 className="flex items-center gap-2 px-4 py-2 text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors"

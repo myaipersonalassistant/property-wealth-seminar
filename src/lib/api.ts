@@ -168,6 +168,15 @@ export async function fetchVisitors() {
   return res.json();
 }
 
+export async function fetchLeads() {
+  const res = await fetch(`${API_BASE}/api/admin/leads`, { headers: getAuthHeaders() });
+  if (!res.ok) {
+    if (res.status === 401) throw new Error('Unauthorized');
+    throw new Error(res.statusText || 'Failed to fetch leads');
+  }
+  return res.json();
+}
+
 export async function fetchEvents(startDate?: Date, endDate?: Date) {
   const params = new URLSearchParams();
   if (startDate) params.set('startDate', startDate.toISOString());

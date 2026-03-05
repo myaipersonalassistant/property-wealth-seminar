@@ -16,7 +16,11 @@ import {
   Target,
   Briefcase,
   Home,
-  TrendingUp
+  TrendingUp,
+  Lock,
+  Mail,
+  User,
+  Loader2
 } from 'lucide-react';
 import CountdownTimer from './CountdownTimer';
 import FAQAccordion from './FAQAccordion';
@@ -25,6 +29,7 @@ import ReasonCard from './ReasonCard';
 import Footer from './Footer';
 import { Link } from 'react-router-dom';
 import { trackEvent, trackPageView } from '@/lib/analytics';
+import { submitReasonsUnlockLead } from '@/lib/leads';
 
 // Image URLs
 const images = {
@@ -123,9 +128,19 @@ const audienceTypes = [
   },
 ];
 
+const REASONS_UNLOCKED_KEY = 'reasons_unlocked';
+
 const AppLayout: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [reasonsUnlocked, setReasonsUnlocked] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return localStorage.getItem(REASONS_UNLOCKED_KEY) === 'true';
+  });
+  const [unlockName, setUnlockName] = useState('');
+  const [unlockEmail, setUnlockEmail] = useState('');
+  const [unlockSubmitting, setUnlockSubmitting] = useState(false);
+  const [unlockError, setUnlockError] = useState<string | null>(null);
   
   useEffect(() => {
     const handleScroll = () => {
@@ -160,6 +175,30 @@ const AppLayout: React.FC = () => {
       element.scrollIntoView({ behavior: 'smooth' });
     }
     setIsMenuOpen(false);
+  };
+
+  const handleUnlockSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const name = unlockName.trim();
+    const email = unlockEmail.trim().toLowerCase();
+    if (!name || !email) {
+      setUnlockError('Please enter your name and email.');
+      return;
+    }
+    setUnlockError(null);
+    setUnlockSubmitting(true);
+    try {
+      await submitReasonsUnlockLead(name, email);
+      localStorage.setItem(REASONS_UNLOCKED_KEY, 'true');
+      setReasonsUnlocked(true);
+      setUnlockName('');
+      setUnlockEmail('');
+    } catch (err) {
+      console.error('Unlock submit error:', err);
+      setUnlockError('Something went wrong. Please try again.');
+    } finally {
+      setUnlockSubmitting(false);
+    }
   };
 
 
@@ -414,7 +453,7 @@ const AppLayout: React.FC = () => {
           </div>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {reasons.map((reason, index) => (
+            {reasons.slice(0, 3).map((reason, index) => (
               <ReasonCard 
                 key={index}
                 number={index + 1}
@@ -422,20 +461,95 @@ const AppLayout: React.FC = () => {
                 description={reason.description}
               />
             ))}
-            {/* Special 7th card spanning full width on larger screens */}
-            <div className="md:col-span-2 lg:col-span-3">
-              <div className="bg-gradient-to-r from-slate-800 to-slate-900 rounded-2xl p-8 text-center">
-                <p className="text-slate-300 text-lg mb-4">
-                  Each principle is explained using real-life experience — including mistakes, lessons learned, and practical examples — so attendees can apply the ideas responsibly and sustainably.
-                </p>
-                <p className="text-amber-400 font-semibold mb-4">
-                  This is not a get-rich-quick talk. It is a grounded, experience-based session.
-                </p>
-                <p className="text-slate-300 text-sm">
-                  The same principles are explored in detail in the book, available for purchase at the event or online.
-                </p>
+            {!reasonsUnlocked ? (
+              <div className="md:col-span-2 lg:col-span-3 flex justify-center">
+                <div className="w-full max-w-xl bg-gradient-to-br from-amber-50 to-amber-100 border-2 border-amber-200 rounded-2xl p-8 shadow-lg">
+                  <div className="flex items-center justify-center gap-3 mb-6">
+                    <div className="w-14 h-14 rounded-xl bg-amber-500/20 flex items-center justify-center">
+                      <Lock className="w-7 h-7 text-amber-600" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-slate-800">Unlock 4 More Reasons</h3>
+                      <p className="text-slate-600 text-sm">Enter your details to see all 7 reasons</p>
+                    </div>
+                  </div>
+                  <form onSubmit={handleUnlockSubmit} className="max-w-md mx-auto space-y-4">
+                    {unlockError && (
+                      <p className="text-red-600 text-sm text-center bg-red-50 py-2 px-3 rounded-lg">{unlockError}</p>
+                    )}
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Name</label>
+                      <div className="relative">
+                        <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                        <input
+                          type="text"
+                          value={unlockName}
+                          onChange={(e) => setUnlockName(e.target.value)}
+                          placeholder="Your name"
+                          className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none"
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                        <input
+                          type="email"
+                          value={unlockEmail}
+                          onChange={(e) => setUnlockEmail(e.target.value)}
+                          placeholder="your@email.com"
+                          className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none"
+                          required
+                        />
+                      </div>
+                    </div>
+                    <button
+                      type="submit"
+                      disabled={unlockSubmitting}
+                      className="w-full py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 text-white font-semibold rounded-xl hover:from-amber-600 hover:to-amber-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                    >
+                      {unlockSubmitting ? (
+                        <>
+                          <Loader2 className="w-5 h-5 animate-spin" />
+                          Unlocking...
+                        </>
+                      ) : (
+                        <>
+                          <Lock className="w-5 h-5" />
+                          Unlock 4 More Reasons
+                        </>
+                      )}
+                    </button>
+                  </form>
+                </div>
               </div>
-            </div>
+            ) : (
+              <>
+                {reasons.slice(3, 7).map((reason, index) => (
+                  <ReasonCard 
+                    key={index + 3}
+                    number={index + 4}
+                    title={reason.title}
+                    description={reason.description}
+                  />
+                ))}
+                <div className="md:col-span-2 lg:col-span-3">
+                  <div className="bg-gradient-to-r from-slate-800 to-slate-900 rounded-2xl p-8 text-center">
+                    <p className="text-slate-300 text-lg mb-4">
+                      Each principle is explained using real-life experience — including mistakes, lessons learned, and practical examples — so attendees can apply the ideas responsibly and sustainably.
+                    </p>
+                    <p className="text-amber-400 font-semibold mb-4">
+                      This is not a get-rich-quick talk. It is a grounded, experience-based session.
+                    </p>
+                    <p className="text-slate-300 text-sm">
+                      The same principles are explored in detail in the book, available for purchase at the event or online.
+                    </p>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </section>

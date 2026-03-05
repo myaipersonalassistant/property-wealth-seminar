@@ -16,6 +16,7 @@ import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminRouteGuard from "./components/AdminRouteGuard";
 import AdminMetrics from "./pages/AdminMetrics";
+import AdminLeads from "./pages/AdminLeads";
 
 const queryClient = new QueryClient();
 
@@ -59,6 +60,14 @@ const App = () => (
               element={
                 <AdminRouteGuard requireAuth={true}>
                   <AdminMetrics />
+                </AdminRouteGuard>
+              }
+            />
+            <Route
+              path="/admin/leads"
+              element={
+                <AdminRouteGuard requireAuth={true}>
+                  <AdminLeads />
                 </AdminRouteGuard>
               }
             />

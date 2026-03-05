@@ -12,9 +12,15 @@ import {
   ChevronRight,
   BookOpen,
   Lock,
+  Send,
+  Loader2,
+  X,
+  BarChart2,
+  Eye,
+  TrendingUp,
 } from 'lucide-react';
 import { getCurrentAdmin, logoutAdmin } from '@/lib/admin-auth';
-import { fetchLeads } from '@/lib/api';
+import { fetchLeads, sendLeadEmails, fetchLeadCampaigns } from '@/lib/api';
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50, 100] as const;
 
@@ -27,13 +33,33 @@ interface Lead {
   lastActivity: string;
 }
 
+interface Campaign {
+  id: string;
+  subject: string;
+  recipient_count: number;
+  sent_count: number;
+  opened_count: number;
+  bounced_count: number;
+  open_rate: string;
+  bounce_rate: string;
+  sent_at: string;
+}
+
 const AdminLeads: React.FC = () => {
   const navigate = useNavigate();
   const [admin, setAdmin] = useState<unknown>(null);
   const [leads, setLeads] = useState<Lead[]>([]);
+  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [campaignsLoading, setCampaignsLoading] = useState(false);
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedEmails, setSelectedEmails] = useState<Set<string>>(new Set());
+  const [showSendModal, setShowSendModal] = useState(false);
+  const [sendSubject, setSendSubject] = useState('');
+  const [sendBody, setSendBody] = useState('');
+  const [sending, setSending] = useState(false);
+  const [sendError, setSendError] = useState<string | null>(null);
 
   useEffect(() => {
     const currentAdmin = getCurrentAdmin();
@@ -43,6 +69,7 @@ const AdminLeads: React.FC = () => {
     }
     setAdmin(currentAdmin);
     loadLeads();
+    loadCampaigns();
   }, [navigate]);
 
   const loadLeads = async () => {
@@ -58,6 +85,62 @@ const AdminLeads: React.FC = () => {
       }
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const loadCampaigns = async () => {
+    try {
+      setCampaignsLoading(true);
+      const data = await fetchLeadCampaigns();
+      setCampaigns(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Error loading campaigns:', error);
+    } finally {
+      setCampaignsLoading(false);
+    }
+  };
+
+
+  const toggleLead = (email: string) => {
+    setSelectedEmails((prev) => {
+      const next = new Set(prev);
+      if (next.has(email)) next.delete(email);
+      else next.add(email);
+      return next;
+    });
+  };
+
+  const selectAll = () => setSelectedEmails(new Set(leads.map((l) => l.email)));
+  const deselectAll = () => setSelectedEmails(new Set());
+
+  const openSendModal = () => {
+    setSendSubject('');
+    setSendBody('');
+    setSendError(null);
+    setShowSendModal(true);
+  };
+
+  const handleSendEmails = async () => {
+    const emails = selectedEmails.size > 0 ? Array.from(selectedEmails) : leads.map((l) => l.email);
+    if (emails.length === 0) {
+      setSendError('No recipients selected.');
+      return;
+    }
+    if (!sendSubject.trim()) {
+      setSendError('Please enter a subject.');
+      return;
+    }
+    setSendError(null);
+    setSending(true);
+    try {
+      await sendLeadEmails(emails, sendSubject.trim(), sendBody.trim());
+      setShowSendModal(false);
+      setSelectedEmails(new Set());
+      loadCampaigns();
+    } catch (err) {
+      setSendError(err instanceof Error ? err.message : 'Failed to send');
+    } finally {
+      setSending(false);
     }
   };
 
@@ -184,6 +267,30 @@ const AdminLeads: React.FC = () => {
                   </option>
                 ))}
               </select>
+              {leads.length > 0 && (
+                <>
+                  <button
+                    onClick={selectAll}
+                    className="px-3 py-2 text-sm text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-lg"
+                  >
+                    Select all
+                  </button>
+                  <button
+                    onClick={deselectAll}
+                    className="px-3 py-2 text-sm text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-lg"
+                  >
+                    Deselect
+                  </button>
+                </>
+              )}
+              <button
+                onClick={openSendModal}
+                disabled={leads.length === 0}
+                className="px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Send className="w-4 h-4" />
+                Send Email {selectedEmails.size > 0 ? `(${selectedEmails.size})` : '(All)'}
+              </button>
             </div>
           </div>
           {isLoading ? (
@@ -203,6 +310,27 @@ const AdminLeads: React.FC = () => {
                 <table className="w-full">
                   <thead className="bg-slate-50 border-b border-slate-200">
                     <tr>
+                      <th className="px-4 py-3 text-left">
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            checked={paginatedLeads.length > 0 && paginatedLeads.every((l) => selectedEmails.has(l.email))}
+                            onChange={(e) => {
+                              const next = new Set(selectedEmails);
+                              if (e.target.checked) {
+                                paginatedLeads.forEach((l) => next.add(l.email));
+                              } else {
+                                paginatedLeads.forEach((l) => next.delete(l.email));
+                              }
+                              setSelectedEmails(next);
+                            }}
+                            className="rounded border-slate-300"
+                          />
+                          <span className="text-xs text-slate-500">
+                            {selectedEmails.size > 0 ? `${selectedEmails.size} selected` : 'Page'}
+                          </span>
+                        </div>
+                      </th>
                       <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Name</th>
                       <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Email</th>
                       <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Sources</th>
@@ -213,6 +341,14 @@ const AdminLeads: React.FC = () => {
                   <tbody className="divide-y divide-slate-200">
                     {paginatedLeads.map((lead) => (
                       <tr key={lead.id} className="hover:bg-slate-50">
+                        <td className="px-4 py-4">
+                          <input
+                            type="checkbox"
+                            checked={selectedEmails.has(lead.email)}
+                            onChange={() => toggleLead(lead.email)}
+                            className="rounded border-slate-300"
+                          />
+                        </td>
                         <td className="px-6 py-4 font-medium text-slate-800">{lead.name}</td>
                         <td className="px-6 py-4 text-slate-600">{lead.email}</td>
                         <td className="px-6 py-4">
@@ -292,7 +428,142 @@ const AdminLeads: React.FC = () => {
             </>
           )}
         </div>
+
+        {/* Campaigns & Metrics */}
+        <div className="mt-8 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+          <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+              <BarChart2 className="w-5 h-5 text-amber-500" />
+              Email Campaigns & Metrics
+            </h2>
+            <button
+              onClick={loadCampaigns}
+              className="text-sm text-slate-600 hover:text-slate-800 flex items-center gap-1"
+            >
+              <RefreshCw className={`w-4 h-4 ${campaignsLoading ? 'animate-spin' : ''}`} />
+              Refresh
+            </button>
+          </div>
+          {campaignsLoading ? (
+            <div className="p-8 text-center">
+              <Loader2 className="w-8 h-8 animate-spin text-amber-500 mx-auto" />
+            </div>
+          ) : campaigns.length === 0 ? (
+            <div className="p-8 text-center text-slate-500 text-sm">No campaigns yet</div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-slate-50 border-b border-slate-200">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Subject</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Sent</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Opened</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Open Rate</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Bounce</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Date</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-200">
+                  {campaigns.map((c) => (
+                    <tr key={c.id} className="hover:bg-slate-50">
+                      <td className="px-6 py-4 font-medium text-slate-800 max-w-[200px] truncate">{c.subject}</td>
+                      <td className="px-6 py-4 text-slate-600">{c.sent_count}</td>
+                      <td className="px-6 py-4">
+                        <span className="inline-flex items-center gap-1 text-emerald-600">
+                          <Eye className="w-4 h-4" />
+                          {c.opened_count}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">
+                          <TrendingUp className="w-3 h-3" />
+                          {c.open_rate}%
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-slate-600">{c.bounced_count} ({c.bounce_rate}%)</td>
+                      <td className="px-6 py-4 text-slate-600 text-sm">
+                        {c.sent_at ? new Date(c.sent_at).toLocaleString() : '-'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
       </main>
+
+      {/* Send Email Modal */}
+      {showSendModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
+              <h2 className="text-xl font-bold text-slate-800">Send Email to Leads</h2>
+              <button onClick={() => setShowSendModal(false)} className="text-slate-400 hover:text-slate-600">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <p className="text-sm text-slate-600">
+                Sending to:{' '}
+                <strong>
+                  {selectedEmails.size > 0
+                    ? `${selectedEmails.size} selected lead${selectedEmails.size !== 1 ? 's' : ''}`
+                    : `All ${leads.length} leads`}
+                </strong>
+              </p>
+              {sendError && (
+                <p className="text-sm text-red-600 bg-red-50 py-2 px-3 rounded-lg">{sendError}</p>
+              )}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Subject</label>
+                <input
+                  type="text"
+                  value={sendSubject}
+                  onChange={(e) => setSendSubject(e.target.value)}
+                  placeholder="Email subject"
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Message (HTML supported)</label>
+                <textarea
+                  value={sendBody}
+                  onChange={(e) => setSendBody(e.target.value)}
+                  placeholder="Your message..."
+                  rows={8}
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none resize-y"
+                />
+              </div>
+              <div className="flex gap-2 pt-2">
+                <button
+                  onClick={handleSendEmails}
+                  disabled={sending}
+                  className="flex-1 py-3 bg-emerald-500 text-white font-semibold rounded-lg hover:bg-emerald-600 disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {sending ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-5 h-5" />
+                      Send Email
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={() => setShowSendModal(false)}
+                  className="px-4 py-3 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

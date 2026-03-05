@@ -168,6 +168,28 @@ export async function fetchVisitors() {
   return res.json();
 }
 
+export async function sendLeadEmails(emails: string[], subject: string, body: string) {
+  const res = await fetch(`${API_BASE}/api/admin/leads/send-email`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ emails, subject, body }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || err.message || 'Failed to send emails');
+  }
+  return res.json();
+}
+
+export async function fetchLeadCampaigns() {
+  const res = await fetch(`${API_BASE}/api/admin/leads/campaigns`, { headers: getAuthHeaders() });
+  if (!res.ok) {
+    if (res.status === 401) throw new Error('Unauthorized');
+    throw new Error(res.statusText || 'Failed to fetch campaigns');
+  }
+  return res.json();
+}
+
 export async function fetchLeads() {
   const res = await fetch(`${API_BASE}/api/admin/leads`, { headers: getAuthHeaders() });
   if (!res.ok) {

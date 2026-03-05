@@ -8,16 +8,23 @@ import {
   RefreshCw,
   Download,
   ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
+  BookOpen,
+  Lock,
 } from 'lucide-react';
 import { getCurrentAdmin, logoutAdmin } from '@/lib/admin-auth';
 import { fetchLeads } from '@/lib/api';
+
+const PAGE_SIZE_OPTIONS = [10, 20, 50, 100] as const;
 
 interface Lead {
   id: string;
   name: string;
   email: string;
-  created_at: string;
-  source: string;
+  sources: string[];
+  firstSeen: string;
+  lastActivity: string;
 }
 
 const AdminLeads: React.FC = () => {
@@ -25,6 +32,8 @@ const AdminLeads: React.FC = () => {
   const [admin, setAdmin] = useState<unknown>(null);
   const [leads, setLeads] = useState<Lead[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [pageSize, setPageSize] = useState<number>(10);
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     const currentAdmin = getCurrentAdmin();
@@ -57,21 +66,39 @@ const AdminLeads: React.FC = () => {
     navigate('/admin/login');
   };
 
+  const totalPages = Math.max(1, Math.ceil(leads.length / pageSize));
+  const paginatedLeads = leads.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const startIndex = (currentPage - 1) * pageSize + 1;
+  const endIndex = Math.min(currentPage * pageSize, leads.length);
+
   const exportToCSV = () => {
-    const headers = ['Name', 'Email', 'Date', 'Source'];
+    const headers = ['Name', 'Email', 'Sources', 'First Seen', 'Last Activity'];
     const rows = leads.map((l) => [
       l.name,
       l.email,
-      l.created_at ? new Date(l.created_at).toLocaleString() : '',
-      l.source || 'reasons_unlock',
+      (l.sources || []).join('; '),
+      l.firstSeen ? new Date(l.firstSeen).toLocaleString() : '',
+      l.lastActivity ? new Date(l.lastActivity).toLocaleString() : '',
     ]);
     const csv = [headers, ...rows].map((row) => row.join(',')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `reasons-unlock-leads-${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = `leads-${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
+  };
+
+  const formatSources = (sources: string[]) => {
+    const items = (sources || []).map((s) =>
+      s === 'order' ? { label: 'Order', icon: BookOpen, color: 'bg-blue-100 text-blue-700' } : { label: 'Unlock', icon: Lock, color: 'bg-amber-100 text-amber-700' }
+    );
+    return items.map(({ label, icon: Icon, color }) => (
+      <span key={label} className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${color}`}>
+        <Icon className="w-3 h-3" />
+        {label}
+      </span>
+    ));
   };
 
   return (
@@ -85,7 +112,7 @@ const AdminLeads: React.FC = () => {
                   <Users className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold text-slate-800">Reasons Unlock Leads</h1>
+                  <h1 className="text-xl font-bold text-slate-800">Leads</h1>
                   <p className="text-xs text-slate-500">
                     {admin && typeof admin === 'object' && 'username' in admin
                       ? `Welcome, ${(admin as { username: string }).username}`
@@ -123,11 +150,11 @@ const AdminLeads: React.FC = () => {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-          <div className="px-6 py-4 border-b border-slate-200 flex flex-col sm:flex-row gap-4 justify-between">
+          <div className="px-6 py-4 border-b border-slate-200 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
             <p className="text-slate-600 text-sm">
-              Users who unlocked the 4 additional reasons by submitting Name & Email on the homepage.
+              Leads from <strong>Reasons Unlock</strong> (homepage form) and <strong>Orders</strong> (ticket/book purchases). Deduped by email.
             </p>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2 items-center">
               <button
                 onClick={loadLeads}
                 className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors flex items-center gap-2"
@@ -143,6 +170,20 @@ const AdminLeads: React.FC = () => {
                 <Download className="w-4 h-4" />
                 Export CSV
               </button>
+              <select
+                value={pageSize}
+                onChange={(e) => {
+                  setPageSize(Number(e.target.value));
+                  setCurrentPage(1);
+                }}
+                className="px-3 py-2 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 bg-white"
+              >
+                {PAGE_SIZE_OPTIONS.map((n) => (
+                  <option key={n} value={n}>
+                    {n} per page
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
           {isLoading ? (
@@ -154,31 +195,101 @@ const AdminLeads: React.FC = () => {
             <div className="p-12 text-center">
               <Mail className="w-12 h-12 text-slate-300 mx-auto mb-4" />
               <p className="text-slate-600">No leads yet</p>
-              <p className="text-slate-500 text-sm mt-1">Leads appear when visitors unlock the extra reasons.</p>
+              <p className="text-slate-500 text-sm mt-1">Leads appear from Reasons Unlock and Orders.</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-slate-50 border-b border-slate-200">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Name</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Email</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Date</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-200">
-                  {leads.map((lead) => (
-                    <tr key={lead.id} className="hover:bg-slate-50">
-                      <td className="px-6 py-4 font-medium text-slate-800">{lead.name}</td>
-                      <td className="px-6 py-4 text-slate-600">{lead.email}</td>
-                      <td className="px-6 py-4 text-slate-600 text-sm">
-                        {lead.created_at ? new Date(lead.created_at).toLocaleString() : '-'}
-                      </td>
+            <>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-slate-50 border-b border-slate-200">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Name</th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Email</th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Sources</th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">First Seen</th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Last Activity</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200">
+                    {paginatedLeads.map((lead) => (
+                      <tr key={lead.id} className="hover:bg-slate-50">
+                        <td className="px-6 py-4 font-medium text-slate-800">{lead.name}</td>
+                        <td className="px-6 py-4 text-slate-600">{lead.email}</td>
+                        <td className="px-6 py-4">
+                          <div className="flex flex-wrap gap-1">
+                            {formatSources(lead.sources || [])}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-slate-600 text-sm">
+                          {lead.firstSeen ? new Date(lead.firstSeen).toLocaleString() : '-'}
+                        </td>
+                        <td className="px-6 py-4 text-slate-600 text-sm">
+                          {lead.lastActivity ? new Date(lead.lastActivity).toLocaleString() : '-'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {leads.length > pageSize && (
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 border-t border-slate-200 bg-slate-50">
+                  <p className="text-sm text-slate-600">
+                    Showing <span className="font-medium">{startIndex}</span> to <span className="font-medium">{endIndex}</span> of <span className="font-medium">{leads.length}</span> leads
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                      disabled={currentPage <= 1}
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                      Previous
+                    </button>
+                    <span className="flex items-center gap-1">
+                      {(() => {
+                        const pages: number[] = [];
+                        if (totalPages <= 7) {
+                          for (let i = 1; i <= totalPages; i++) pages.push(i);
+                        } else {
+                          pages.push(1);
+                          const start = Math.max(2, currentPage - 1);
+                          const end = Math.min(totalPages - 1, currentPage + 1);
+                          if (start > 2) pages.push(-1);
+                          for (let i = start; i <= end; i++) {
+                            if (!pages.includes(i)) pages.push(i);
+                          }
+                          if (end < totalPages - 1) pages.push(-2);
+                          if (totalPages > 1) pages.push(totalPages);
+                        }
+                        return pages.map((p) =>
+                          p < 0 ? (
+                            <span key={p} className="px-2 text-slate-400">…</span>
+                          ) : (
+                            <button
+                              key={p}
+                              onClick={() => setCurrentPage(p)}
+                              className={`min-w-[2rem] px-2 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                                currentPage === p ? 'bg-amber-500 text-white' : 'text-slate-700 hover:bg-slate-200'
+                              }`}
+                            >
+                              {p}
+                            </button>
+                          )
+                        );
+                      })()}
+                    </span>
+                    <button
+                      onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                      disabled={currentPage >= totalPages}
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Next
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
       </main>

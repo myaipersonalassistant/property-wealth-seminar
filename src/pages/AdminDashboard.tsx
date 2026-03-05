@@ -31,7 +31,7 @@ import { fetchAllOrders, updateOrder, sendOrderEmail, type Order } from '@/lib/a
 import { getCurrentAdmin, logoutAdmin } from '@/lib/admin-auth';
 import { formatCurrency } from '@/lib/stripe';
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE_OPTIONS = [10, 20, 50, 100] as const;
 
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -47,6 +47,7 @@ const AdminDashboard: React.FC = () => {
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [emailStatus, setEmailStatus] = useState<{ [key: string]: 'sending' | 'success' | 'error' }>({});
   const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   useEffect(() => {
     const currentAdmin = getCurrentAdmin();
@@ -177,13 +178,13 @@ const AdminDashboard: React.FC = () => {
   };
 
   // Pagination
-  const totalPages = Math.max(1, Math.ceil(filteredOrders.length / PAGE_SIZE));
+  const totalPages = Math.max(1, Math.ceil(filteredOrders.length / pageSize));
   const paginatedOrders = filteredOrders.slice(
-    (currentPage - 1) * PAGE_SIZE,
-    currentPage * PAGE_SIZE,
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize,
   );
-  const startIndex = (currentPage - 1) * PAGE_SIZE + 1;
-  const endIndex = Math.min(currentPage * PAGE_SIZE, filteredOrders.length);
+  const startIndex = (currentPage - 1) * pageSize + 1;
+  const endIndex = Math.min(currentPage * pageSize, filteredOrders.length);
 
   const exportToCSV = () => {
     const headers = ['Order Reference', 'Type', 'Customer Name', 'Email', 'Phone', 'Quantity', 'Amount', 'Status', 'Email Status', 'Email Sent Count', 'Date'];
@@ -549,11 +550,27 @@ const AdminDashboard: React.FC = () => {
           {/* Pagination */}
           {!isLoading && filteredOrders.length > 0 && (
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 border-t border-slate-200 bg-slate-50">
-              <p className="text-sm text-slate-600">
-                Showing <span className="font-medium">{startIndex}</span> to{' '}
-                <span className="font-medium">{endIndex}</span> of{' '}
-                <span className="font-medium">{filteredOrders.length}</span> orders
-              </p>
+              <div className="flex flex-wrap items-center gap-4">
+                <p className="text-sm text-slate-600">
+                  Showing <span className="font-medium">{startIndex}</span> to{' '}
+                  <span className="font-medium">{endIndex}</span> of{' '}
+                  <span className="font-medium">{filteredOrders.length}</span> orders
+                </p>
+                <select
+                  value={pageSize}
+                  onChange={(e) => {
+                    setPageSize(Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
+                  className="px-3 py-1.5 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 bg-white"
+                >
+                  {PAGE_SIZE_OPTIONS.map((n) => (
+                    <option key={n} value={n}>
+                      {n} per page
+                    </option>
+                  ))}
+                </select>
+              </div>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}

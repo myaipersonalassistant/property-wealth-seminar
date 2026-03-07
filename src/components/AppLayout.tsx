@@ -39,6 +39,7 @@ const images = {
   chrisDolan: './dolan.jpg',
   lewisMills: './lewis.jpg',
   nickNicolaou: './nick.jpg',
+  adeniyiZacchaeus: './adeniyi.jpg',
   accountant: 'https://d64gsuwffb70l.cloudfront.net/697242eb29a6a04fc9873637_1769096290851_eaec5242.png',
   charity: 'https://d64gsuwffb70l.cloudfront.net/697242eb29a6a04fc9873637_1769096316988_a7dbb4e1.jpg',
   hero: 'https://d64gsuwffb70l.cloudfront.net/697242eb29a6a04fc9873637_1769096345107_b9d52d49.png',
@@ -62,6 +63,12 @@ const panelists = [
     role: 'Estate Agent',
     image: images.nickNicolaou,
     description: 'Expert insights on buying and selling in the current market, property valuations, and market trends. Helps clients navigate listings and make informed decisions.'
+  },
+  {
+    name: 'Adeniyi Zacchaeus',
+    role: 'Accountant',
+    image: images.adeniyiZacchaeus,
+    description: 'Expert guidance on property investment tax, structuring finances, and maximising returns. Helps investors plan and optimise their portfolio for long-term growth.'
   },
 ];
 

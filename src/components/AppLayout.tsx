@@ -103,6 +103,15 @@ const reasons = [
   },
 ];
 
+const whatYouWillLearn = [
+  'Navigating buying and selling property in today\'s market',
+  'Understanding mortgage affordability and interest-rate risks',
+  'Real-life property investing experiences — lessons from successes and challenges',
+  'The legal responsibilities every landlord should understand, including eviction realities',
+  'Tax planning and structuring your property portfolio effectively',
+  'Strategies for building a sustainable long-term property portfolio',
+];
+
 const ticketIncludes = [
   'Full 3-hour property wealth seminar',
   'Expert panel discussion with industry professionals',
@@ -303,18 +312,11 @@ const AppLayout: React.FC = () => {
               </div>
               
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6">
-                Build Wealth Through Property{' '} <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-500">
-                  7 Reasons Why
-                </span>
+                How Ordinary People Are Building Wealth Through Property — Even Without Large Savings
               </h1>
               
-              <p className="text-xl text-slate-300 mb-4">
-                How Real Estate Builds Wealth, Security, and Long-Term Stability
-              </p>
-              
-              <p className="text-slate-400 mb-8 leading-relaxed">
-                Join property investor and author <strong className="text-white">Chris Ifonlaja</strong>, alongside a panel of experienced property professionals, for a powerful and practical seminar exploring how people can use property to build long-term financial security.
+              <p className="text-xl text-slate-300 mb-8 leading-relaxed">
+                Join property investor <strong className="text-white">Chris Ifonlaja</strong> and other property experts for a live seminar revealing the strategies used to start and scale a property portfolio.
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 mb-10">
@@ -324,26 +326,16 @@ const AppLayout: React.FC = () => {
                   className="group w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl font-semibold text-lg hover:from-amber-600 hover:to-amber-700 transition-all shadow-xl shadow-amber-500/30 flex items-center justify-center gap-2"
                 >
                   <Ticket className="w-5 h-5" />
-                  Book Your Seat — £25
+                  Book Your Seat
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </Link>
-                <Link
-                  to="/book"
-                  onClick={() => trackEvent('home_book_page_cta_click')}
-                  className="group w-full sm:w-auto px-8 py-4 bg-white/10 backdrop-blur-sm border border-white/20 text-white rounded-xl font-semibold hover:bg-white/20 transition-all flex items-center justify-center gap-2"
-                >
-                  <BookOpen className="w-5 h-5" />
-                  Buy the Book
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </Link>
-                <span className="text-cyan-200 text-sm text-center sm:hidden">All Proceeds to Charity</span>
               </div>
-              <span className="hidden sm:block text-cyan-200 text-sm -mt-6 mb-10 text-center">All Proceeds to Charity</span>
               
               {/* Countdown Timer */}
               <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
-                <p className="text-amber-300 text-sm font-medium mb-4 text-center">Event Starts In</p>
+                <p className="text-amber-300 text-sm font-medium mb-2 text-center">Event Starts In</p>
                 <CountdownTimer />
+                <p className="text-amber-200 text-sm font-medium mt-4 text-center">Limited seats available for this seminar.</p>
               </div>
             </div>
             
@@ -445,120 +437,117 @@ const AppLayout: React.FC = () => {
         </div>
       </section>
 
-      {/* About the Seminar */}
+      {/* What You'll Learn At This Seminar */}
       <section id="about" className="py-20 sm:py-28 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <span className="inline-block px-4 py-1.5 bg-amber-100 text-amber-700 rounded-full text-sm font-semibold mb-4">
-              About the Seminar
+              What You'll Learn
             </span>
             <h2 className="text-3xl sm:text-4xl font-bold text-slate-800 mb-6">
-              The 7 Core Reasons Property Builds Wealth
+              What You'll Learn At This Seminar
             </h2>
             <p className="text-slate-600 text-lg leading-relaxed">
-              Property remains one of the most reliable ways to build long-term wealth, but real success depends on understanding how income, growth, finance, tax, and risk all work together over time. These principles are explored in depth both at the seminar and in the book <em>"Build Wealth Through Property 7 Reasons Why"</em>.
+              A practical, experience-based session covering the essentials of property investing — from market know-how to tax and legal realities.
             </p>
           </div>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {reasons.slice(0, 3).map((reason, index) => (
-              <ReasonCard 
-                key={index}
-                number={index + 1}
-                title={reason.title}
-                description={reason.description}
-              />
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-16">
+            {whatYouWillLearn.map((item, index) => (
+              <div key={index} className="flex items-start gap-3 bg-slate-50 rounded-xl p-5 border border-slate-100">
+                <CheckCircle2 className="w-6 h-6 text-amber-500 flex-shrink-0 mt-0.5" />
+                <span className="text-slate-700">{item}</span>
+              </div>
             ))}
-            {!reasonsUnlocked ? (
-              <div className="md:col-span-2 lg:col-span-3 flex justify-center">
-                <div className="w-full max-w-xl bg-gradient-to-br from-amber-50 to-amber-100 border-2 border-amber-200 rounded-2xl p-8 shadow-lg">
-                  <div className="flex items-center justify-center gap-3 mb-6">
-                    <div className="w-14 h-14 rounded-xl bg-amber-500/20 flex items-center justify-center">
-                      <Lock className="w-7 h-7 text-amber-600" />
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold text-slate-800">Unlock 4 More Reasons</h3>
-                      <p className="text-slate-600 text-sm">Enter your details to see all 7 reasons</p>
+          </div>
+
+          {/* Lead gen: Unlock 4 more reasons */}
+          {!reasonsUnlocked ? (
+            <div className="flex justify-center">
+              <div className="w-full max-w-xl bg-gradient-to-br from-amber-50 to-amber-100 border-2 border-amber-200 rounded-2xl p-8 shadow-lg">
+                <div className="flex items-center justify-center gap-3 mb-6">
+                  <div className="w-14 h-14 rounded-xl bg-amber-500/20 flex items-center justify-center">
+                    <Lock className="w-7 h-7 text-amber-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-slate-800">Unlock 4 More Reasons</h3>
+                    <p className="text-slate-600 text-sm">Enter your details to see all 7 reasons why property builds wealth</p>
+                  </div>
+                </div>
+                <form onSubmit={handleUnlockSubmit} className="max-w-md mx-auto space-y-4">
+                  {unlockError && (
+                    <p className="text-red-600 text-sm text-center bg-red-50 py-2 px-3 rounded-lg">{unlockError}</p>
+                  )}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Name</label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                      <input
+                        type="text"
+                        value={unlockName}
+                        onChange={(e) => setUnlockName(e.target.value)}
+                        placeholder="Your name"
+                        className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none"
+                        required
+                      />
                     </div>
                   </div>
-                  <form onSubmit={handleUnlockSubmit} className="max-w-md mx-auto space-y-4">
-                    {unlockError && (
-                      <p className="text-red-600 text-sm text-center bg-red-50 py-2 px-3 rounded-lg">{unlockError}</p>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                      <input
+                        type="email"
+                        value={unlockEmail}
+                        onChange={(e) => setUnlockEmail(e.target.value)}
+                        placeholder="your@email.com"
+                        className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={unlockSubmitting}
+                    className="w-full py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 text-white font-semibold rounded-xl hover:from-amber-600 hover:to-amber-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                  >
+                    {unlockSubmitting ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        Unlocking...
+                      </>
+                    ) : (
+                      <>
+                        <Lock className="w-5 h-5" />
+                        Unlock 4 More Reasons
+                      </>
                     )}
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-1">Name</label>
-                      <div className="relative">
-                        <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                        <input
-                          type="text"
-                          value={unlockName}
-                          onChange={(e) => setUnlockName(e.target.value)}
-                          placeholder="Your name"
-                          className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none"
-                          required
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
-                      <div className="relative">
-                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                        <input
-                          type="email"
-                          value={unlockEmail}
-                          onChange={(e) => setUnlockEmail(e.target.value)}
-                          placeholder="your@email.com"
-                          className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none"
-                          required
-                        />
-                      </div>
-                    </div>
-                    <button
-                      type="submit"
-                      disabled={unlockSubmitting}
-                      className="w-full py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 text-white font-semibold rounded-xl hover:from-amber-600 hover:to-amber-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-                    >
-                      {unlockSubmitting ? (
-                        <>
-                          <Loader2 className="w-5 h-5 animate-spin" />
-                          Unlocking...
-                        </>
-                      ) : (
-                        <>
-                          <Lock className="w-5 h-5" />
-                          Unlock 4 More Reasons
-                        </>
-                      )}
-                    </button>
-                  </form>
+                  </button>
+                </form>
+              </div>
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {reasons.slice(3, 7).map((reason, index) => (
+                <ReasonCard 
+                  key={index + 3}
+                  number={index + 4}
+                  title={reason.title}
+                  description={reason.description}
+                />
+              ))}
+              <div className="md:col-span-2 lg:col-span-3">
+                <div className="bg-gradient-to-r from-slate-800 to-slate-900 rounded-2xl p-8 text-center">
+                  <p className="text-slate-300 text-lg mb-4">
+                    Each principle is explained using real-life experience — including mistakes, lessons learned, and practical examples — so attendees can apply the ideas responsibly and sustainably.
+                  </p>
+                  <p className="text-amber-400 font-semibold mb-4">
+                    This is not a get-rich-quick talk. It is a grounded, experience-based session.
+                  </p>
                 </div>
               </div>
-            ) : (
-              <>
-                {reasons.slice(3, 7).map((reason, index) => (
-                  <ReasonCard 
-                    key={index + 3}
-                    number={index + 4}
-                    title={reason.title}
-                    description={reason.description}
-                  />
-                ))}
-                <div className="md:col-span-2 lg:col-span-3">
-                  <div className="bg-gradient-to-r from-slate-800 to-slate-900 rounded-2xl p-8 text-center">
-                    <p className="text-slate-300 text-lg mb-4">
-                      Each principle is explained using real-life experience — including mistakes, lessons learned, and practical examples — so attendees can apply the ideas responsibly and sustainably.
-                    </p>
-                    <p className="text-amber-400 font-semibold mb-4">
-                      This is not a get-rich-quick talk. It is a grounded, experience-based session.
-                    </p>
-                    <p className="text-slate-300 text-sm">
-                      The same principles are explored in detail in the book, available for purchase at the event or online.
-                    </p>
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </section>
 
@@ -605,12 +594,12 @@ const AppLayout: React.FC = () => {
               </div>
               <div className="mt-8 flex flex-wrap gap-4">
                 <Link
-                  to="/book"
+                  to="/booking"
                   className="group px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg font-semibold hover:from-amber-600 hover:to-amber-700 transition-all shadow-lg shadow-amber-500/25 flex items-center gap-2"
                 >
-                  <BookOpen className="w-5 h-5" />
-                  Purchase the Book
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" /> £19.99
+                  <Ticket className="w-5 h-5" />
+                  Book Your Seat
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </Link>
               </div>
               <div className="mt-8 flex flex-wrap gap-4">
@@ -697,21 +686,13 @@ const AppLayout: React.FC = () => {
                   </div>
                 ))}
               </div>
-              <div className="mt-8 flex flex-col sm:flex-row gap-4">
+              <div className="mt-8">
                 <Link
                   to="/booking"
-                  className="group px-8 py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl font-semibold text-lg hover:from-amber-600 hover:to-amber-700 transition-all shadow-xl shadow-amber-500/30 flex items-center justify-center gap-2"
+                  className="group inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl font-semibold text-lg hover:from-amber-600 hover:to-amber-700 transition-all shadow-xl shadow-amber-500/30"
                 >
                   <Ticket className="w-5 h-5" />
                   Book Your Seat Now
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </Link>
-                <Link
-                  to="/book"
-                  className="px-8 py-4 bg-white/10 backdrop-blur-sm border border-white/20 text-white rounded-xl font-semibold text-lg hover:bg-white/20 transition-all flex items-center justify-center gap-2"
-                >
-                  <BookOpen className="w-5 h-5" />
-                  Buy the Book
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </Link>
               </div>
@@ -735,7 +716,7 @@ const AppLayout: React.FC = () => {
         </div>
       </section>
 
-      {/* Book Purchase Section */}
+      {/* Bonus for Seminar Attendees */}
       <section id="book" className="py-20 sm:py-28 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -750,71 +731,37 @@ const AppLayout: React.FC = () => {
             
             <div>
               <span className="inline-block px-4 py-1.5 bg-amber-100 text-amber-700 rounded-full text-sm font-semibold mb-4">
-                Available Now
+                Bonus for Seminar Attendees
               </span>
-              <h2 className="text-3xl sm:text-4xl font-bold text-slate-800 mb-4">
-                Build Wealth Through Property 7 Reasons Why
+              <h2 className="text-3xl sm:text-4xl font-bold text-slate-800 mb-6">
+                What You Receive When You Attend
               </h2>
-              <p className="text-amber-600 font-semibold text-lg mb-6">
-                The Complete Guide to Property Investment
-              </p>
-              <div className="space-y-4 text-slate-600 leading-relaxed mb-8">
+              <div className="space-y-4 text-slate-600 leading-relaxed">
                 <p>
-                  This comprehensive book explores the seven core reasons why property remains one of the most 
-                  reliable paths to building long-term wealth. Written from real-life experience, it provides 
-                  practical insights, lessons learned, and actionable strategies for both beginners and experienced 
-                  investors.
+                  All seminar attendees will receive a digital copy of the opening chapter from Chris Ifonlaja's book <em className="text-slate-800 font-medium">Build Wealth Through Property: 7 Reasons Why</em>. This chapter introduces the foundational principles behind property wealth building and provides a practical starting point for anyone looking to understand how property can form part of a long-term financial strategy.
                 </p>
                 <p>
-                  The book covers everything from understanding leverage and financing to managing risk, tax 
-                  advantages, and building a sustainable property portfolio. Each chapter is grounded in practical 
-                  experience, including both successes and challenges.
+                  Attendees will also receive a practical investor resource:
                 </p>
                 <div className="bg-amber-50 rounded-xl p-6 border border-amber-200">
-                  <div className="flex items-start gap-4">
-                    <Heart className="w-6 h-6 text-rose-600 flex-shrink-0 mt-1" />
-                    <div>
-                      <p className="font-semibold text-slate-800 mb-2">Supporting Charity</p>
-                      <p className="text-slate-700 text-sm">
-                        All proceeds from book sales at the event will be donated to Place of Victory Charity, 
-                        supporting their mission to secure a permanent community location.
-                      </p>
-                    </div>
-                  </div>
+                  <p className="font-semibold text-slate-800 mb-1">Practical Checklist</p>
+                  <p className="text-slate-700">
+                    &ldquo;7 Questions to Ask Before Buying Your First Property&rdquo; — a simple framework to help you evaluate potential property investments.
+                  </p>
                 </div>
+                <p className="text-slate-600 text-sm">
+                  These materials will be available for you to take away on the day. No sign-up required.
+                </p>
               </div>
-              
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Link
-                  to="/book"
-                  className="group px-8 py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl font-semibold text-lg hover:from-amber-600 hover:to-amber-700 transition-all shadow-xl shadow-amber-500/30 flex items-center justify-center gap-2"
-                >
-                  <BookOpen className="w-5 h-5" />
-                  Purchase the Book
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </Link>
+              <div className="mt-8">
                 <Link
                   to="/booking"
-                  className="px-8 py-4 bg-slate-100 text-slate-700 rounded-xl font-semibold hover:bg-slate-200 transition-all flex items-center justify-center gap-2"
+                  className="group inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl font-semibold text-lg hover:from-amber-600 hover:to-amber-700 transition-all shadow-lg shadow-amber-500/25"
                 >
                   <Ticket className="w-5 h-5" />
-                  Book Seminar Ticket
+                  Book Your Seat
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </Link>
-              </div>
-              
-              <div className="mt-6 flex flex-wrap gap-4 text-sm text-slate-600">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-amber-500" />
-                  <span>Available at the event</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-amber-500" />
-                  <span>100% proceeds to charity</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-amber-500" />
-                  <span>Practical, experience-based content</span>
-                </div>
               </div>
             </div>
           </div>
@@ -921,32 +868,22 @@ const AppLayout: React.FC = () => {
         
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-6">
-            Join Us for the Seminar or Get the Book
+            Ready to Learn How Property Investors Build Wealth?
           </h2>
           <p className="text-xl text-slate-300 mb-4">
-            Attend the live seminar or purchase the book to start your property investment journey.
+            Join us for a live seminar designed to help you better understand property investing and the principles behind building long-term wealth.
           </p>
           <p className="text-slate-400 mb-10 max-w-2xl mx-auto">
-            Whether you are just starting your property journey or looking to invest more wisely, the seminar 
-            and book will give you clarity, confidence, and practical next steps — while also supporting a 
-            meaningful community cause.
+            Whether you are just starting your property journey or looking to invest more wisely, this seminar will provide practical insights, real experiences, and clear next steps while also supporting a meaningful community cause.
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-10">
+          <div className="flex justify-center mb-10">
             <Link
               to="/booking"
               className="group px-10 py-5 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl font-semibold text-lg hover:from-amber-600 hover:to-amber-700 transition-all shadow-xl shadow-amber-500/30 flex items-center justify-center gap-3"
             >
               <Ticket className="w-6 h-6" />
-              Book Your Seat — £25
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </Link>
-            <Link
-              to="/book"
-              className="group px-10 py-5 bg-white/10 backdrop-blur-sm border border-white/20 text-white rounded-xl font-semibold text-lg hover:bg-white/20 transition-all flex items-center justify-center gap-3"
-            >
-              <BookOpen className="w-6 h-6" />
-              Purchase the Book
+              Book Your Seat
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>

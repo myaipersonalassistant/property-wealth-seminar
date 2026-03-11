@@ -16,20 +16,14 @@ import {
   Target,
   Briefcase,
   Home,
-  TrendingUp,
-  Lock,
-  Mail,
-  User,
-  Loader2
+  TrendingUp
 } from 'lucide-react';
 import CountdownTimer from './CountdownTimer';
 import FAQAccordion from './FAQAccordion';
 import PanelCard from './PanelCard';
-import ReasonCard from './ReasonCard';
 import Footer from './Footer';
 import { Link } from 'react-router-dom';
 import { trackEvent, trackPageView } from '@/lib/analytics';
-import { submitReasonsUnlockLead } from '@/lib/leads';
 
 // Image URLs
 const images = {
@@ -72,37 +66,6 @@ const panelists = [
   },
 ];
 
-const reasons = [
-  {
-    title: 'Multiple Pathways to Wealth',
-    description: "Property isn't one strategy — it's a system with options that create resilience and choice."
-  },
-  {
-    title: 'Predictable, Repeatable Income',
-    description: 'Rental income provides steady cash flow and long-term financial stability.'
-  },
-  {
-    title: 'Leverages "Other People\'s Money"',
-    description: 'Leverage allows small deposits to control large assets, multiplying returns and accelerating growth.'
-  },
-  {
-    title: 'Reliable Store of Value',
-    description: 'Property preserves wealth because land is scarce and demand is constant.'
-  },
-  {
-    title: 'Appreciates Over Time',
-    description: 'Property is one of the strongest appreciating assets, driven by supply, demand, and economic factors.'
-  },
-  {
-    title: 'Powerful Hedge Against Inflation',
-    description: 'As the cost of living rises, property protects purchasing power and makes debt cheaper in real terms.'
-  },
-  {
-    title: 'Significant Tax Advantages',
-    description: 'Governments encourage property ownership through various tax benefits and incentives.'
-  },
-];
-
 const whatYouWillLearn = [
   'Navigating buying and selling property in today\'s market',
   'Understanding mortgage affordability and interest-rate risks',
@@ -117,7 +80,6 @@ const ticketIncludes = [
   'Expert panel discussion with industry professionals',
   'Live audience Q&A session',
   'Free downloadable investor tools and checklists',
-  'Opportunity to purchase the book and support charity',
   'Networking with like-minded investors',
 ];
 
@@ -144,19 +106,9 @@ const audienceTypes = [
   },
 ];
 
-const REASONS_UNLOCKED_KEY = 'reasons_unlocked';
-
 const AppLayout: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [reasonsUnlocked, setReasonsUnlocked] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    return localStorage.getItem(REASONS_UNLOCKED_KEY) === 'true';
-  });
-  const [unlockName, setUnlockName] = useState('');
-  const [unlockEmail, setUnlockEmail] = useState('');
-  const [unlockSubmitting, setUnlockSubmitting] = useState(false);
-  const [unlockError, setUnlockError] = useState<string | null>(null);
   
   useEffect(() => {
     const handleScroll = () => {
@@ -192,31 +144,6 @@ const AppLayout: React.FC = () => {
     }
     setIsMenuOpen(false);
   };
-
-  const handleUnlockSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const name = unlockName.trim();
-    const email = unlockEmail.trim().toLowerCase();
-    if (!name || !email) {
-      setUnlockError('Please enter your name and email.');
-      return;
-    }
-    setUnlockError(null);
-    setUnlockSubmitting(true);
-    try {
-      await submitReasonsUnlockLead(name, email);
-      localStorage.setItem(REASONS_UNLOCKED_KEY, 'true');
-      setReasonsUnlocked(true);
-      setUnlockName('');
-      setUnlockEmail('');
-    } catch (err) {
-      console.error('Unlock submit error:', err);
-      setUnlockError('Something went wrong. Please try again.');
-    } finally {
-      setUnlockSubmitting(false);
-    }
-  };
-
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -344,20 +271,10 @@ const AppLayout: React.FC = () => {
               <div className="bg-white/10 backdrop-blur-md rounded-3xl p-8 border border-white/20">
                 <img 
                   src={images.book} 
-                  alt="Build Wealth Through Property Book - 7 Reasons Why Real Estate Builds Wealth"
+                  alt="Build Wealth Through Property - 7 Reasons Why"
                   className="w-48 mx-auto mb-6 rounded-lg shadow-2xl"
                   loading="lazy"
                 />
-                <div className="text-center mb-6">
-                  <p className="text-white font-semibold text-lg mb-2">Available Now</p>
-                  <p className="text-slate-300 text-sm mb-4">Purchase the book at the event or online</p>
-                  <Link
-                    to="/book"
-                    className="px-6 py-2.5 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/30 text-white rounded-lg font-semibold text-sm transition-all inline-block"
-                  >
-                    Buy the Book - £19.99
-                  </Link>
-                </div>
                 <div className="space-y-4">
                   <div className="flex items-center gap-4 text-white">
                     <div className="w-12 h-12 bg-amber-500/20 rounded-xl flex items-center justify-center">
@@ -452,7 +369,7 @@ const AppLayout: React.FC = () => {
             </p>
           </div>
           
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-16">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {whatYouWillLearn.map((item, index) => (
               <div key={index} className="flex items-start gap-3 bg-slate-50 rounded-xl p-5 border border-slate-100">
                 <CheckCircle2 className="w-6 h-6 text-amber-500 flex-shrink-0 mt-0.5" />
@@ -460,94 +377,6 @@ const AppLayout: React.FC = () => {
               </div>
             ))}
           </div>
-
-          {/* Lead gen: Unlock 4 more reasons */}
-          {!reasonsUnlocked ? (
-            <div className="flex justify-center">
-              <div className="w-full max-w-xl bg-gradient-to-br from-amber-50 to-amber-100 border-2 border-amber-200 rounded-2xl p-8 shadow-lg">
-                <div className="flex items-center justify-center gap-3 mb-6">
-                  <div className="w-14 h-14 rounded-xl bg-amber-500/20 flex items-center justify-center">
-                    <Lock className="w-7 h-7 text-amber-600" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-slate-800">Unlock 4 More Reasons</h3>
-                    <p className="text-slate-600 text-sm">Enter your details to see all 7 reasons why property builds wealth</p>
-                  </div>
-                </div>
-                <form onSubmit={handleUnlockSubmit} className="max-w-md mx-auto space-y-4">
-                  {unlockError && (
-                    <p className="text-red-600 text-sm text-center bg-red-50 py-2 px-3 rounded-lg">{unlockError}</p>
-                  )}
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Name</label>
-                    <div className="relative">
-                      <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                      <input
-                        type="text"
-                        value={unlockName}
-                        onChange={(e) => setUnlockName(e.target.value)}
-                        placeholder="Your name"
-                        className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none"
-                        required
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                      <input
-                        type="email"
-                        value={unlockEmail}
-                        onChange={(e) => setUnlockEmail(e.target.value)}
-                        placeholder="your@email.com"
-                        className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none"
-                        required
-                      />
-                    </div>
-                  </div>
-                  <button
-                    type="submit"
-                    disabled={unlockSubmitting}
-                    className="w-full py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 text-white font-semibold rounded-xl hover:from-amber-600 hover:to-amber-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-                  >
-                    {unlockSubmitting ? (
-                      <>
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                        Unlocking...
-                      </>
-                    ) : (
-                      <>
-                        <Lock className="w-5 h-5" />
-                        Unlock 4 More Reasons
-                      </>
-                    )}
-                  </button>
-                </form>
-              </div>
-            </div>
-          ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {reasons.slice(3, 7).map((reason, index) => (
-                <ReasonCard 
-                  key={index + 3}
-                  number={index + 4}
-                  title={reason.title}
-                  description={reason.description}
-                />
-              ))}
-              <div className="md:col-span-2 lg:col-span-3">
-                <div className="bg-gradient-to-r from-slate-800 to-slate-900 rounded-2xl p-8 text-center">
-                  <p className="text-slate-300 text-lg mb-4">
-                    Each principle is explained using real-life experience — including mistakes, lessons learned, and practical examples — so attendees can apply the ideas responsibly and sustainably.
-                  </p>
-                  <p className="text-amber-400 font-semibold mb-4">
-                    This is not a get-rich-quick talk. It is a grounded, experience-based session.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </section>
 
@@ -562,13 +391,6 @@ const AppLayout: React.FC = () => {
                 alt="Chris Ifonlaja"
                 className="relative rounded-2xl shadow-2xl w-full max-w-md mx-auto"
               />
-              <div className="absolute -bottom-6 -right-6 bg-white rounded-2xl shadow-xl p-4 hidden sm:block">
-                <img 
-                  src={images.book}
-                  alt="Book Cover"
-                  className="w-24 rounded-lg shadow-lg"
-                />
-              </div>
             </div>
             
             <div>
@@ -586,7 +408,7 @@ const AppLayout: React.FC = () => {
                   Chris is a property investor, community leader, and author of <em className="text-slate-800 font-medium">Build Wealth Through Property: 7 Reasons Why</em>. His journey includes both successful investments and difficult seasons shaped by market downturns, tenant challenges, and financing pressures.
                 </p>
                 <p>
-                  Through this seminar and his book, Chris shares not only strategies, but also the importance of stewardship, discipline, and long-term thinking in building wealth that lasts. The book is available for purchase at the event, with all proceeds from the event supporting Place of Victory charity's community hub building project.
+                  Through this seminar and his book, Chris shares not only strategies, but also the importance of stewardship, discipline, and long-term thinking in building wealth that lasts. Proceeds from the event support Place of Victory charity's community hub building project.
                 </p>
                 <p>
                   His wider mission is to combine financial education with community transformation, helping individuals grow while also strengthening the communities around them.
@@ -636,31 +458,10 @@ const AppLayout: React.FC = () => {
             </p>
           </div>
           
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {panelists.map((panelist, index) => (
               <PanelCard key={index} {...panelist} />
             ))}
-          </div>
-          
-          <div className="bg-slate-50 rounded-2xl p-8">
-            <h3 className="text-xl font-bold text-slate-800 mb-6 text-center">
-              Topics the Panel Will Address
-            </h3>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {[
-                'Buying and selling in the current market',
-                'Mortgage affordability and interest-rate risk',
-                'Real-life investing experiences',
-                'Legal responsibilities and eviction realities',
-                'Tax planning and portfolio structure',
-                'Building a sustainable property portfolio'
-              ].map((topic, index) => (
-                <div key={index} className="flex items-center gap-3 bg-white rounded-xl p-4">
-                  <CheckCircle2 className="w-5 h-5 text-amber-500 flex-shrink-0" />
-                  <span className="text-slate-700">{topic}</span>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
       </section>
@@ -789,13 +590,13 @@ const AppLayout: React.FC = () => {
               </h2>
               <div className="space-y-4 text-slate-600 leading-relaxed">
                 <p>
-                  This event also serves as a <strong className="text-slate-800">charity book launch</strong>.
+                  This event also supports <strong className="text-slate-800">Place of Victory Charity</strong>.
                 </p>
                 <p className="text-lg">
-                  <strong className="text-rose-600">All proceeds from book sales on the day will be donated to Place of Victory Charity</strong>, in support of securing a permanent community location to serve families, young people, and outreach programmes.
+                  <strong className="text-rose-600">Event proceeds help support Place of Victory Charity</strong>, in securing a permanent community location to serve families, young people, and outreach programmes.
                 </p>
                 <p>
-                  By attending and purchasing the book, you are investing not only in your own financial education, but also in long-term community development.
+                  By attending, you are investing in your own financial education while supporting long-term community development.
                 </p>
               </div>
               <div className="mt-8 bg-white rounded-xl p-6 shadow-lg border border-rose-100">
@@ -804,8 +605,8 @@ const AppLayout: React.FC = () => {
                     <Gift className="w-7 h-7 text-rose-600" />
                   </div>
                   <div>
-                    <p className="font-semibold text-slate-800">100% of Book Proceeds</p>
-                    <p className="text-slate-600">Go directly to charity</p>
+                    <p className="font-semibold text-slate-800">Supporting Community</p>
+                    <p className="text-slate-600">Event supports Place of Victory Charity</p>
                   </div>
                 </div>
               </div>

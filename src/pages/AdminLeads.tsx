@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Users,
@@ -18,9 +18,12 @@ import {
   BarChart2,
   Eye,
   TrendingUp,
+  Clock,
+  FileUp,
+  Sparkles,
 } from 'lucide-react';
 import { getCurrentAdmin, logoutAdmin } from '@/lib/admin-auth';
-import { fetchLeads, sendLeadEmails, fetchLeadCampaigns } from '@/lib/api';
+import { fetchLeads, sendLeadEmails, fetchLeadCampaigns, fetchAllOrders, type Order } from '@/lib/api';
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50, 100] as const;
 
@@ -45,12 +48,37 @@ interface Campaign {
   sent_at: string;
 }
 
+const PENDING_REMINDER_TEMPLATE = {
+  subject: "Your seat is still waiting — Build Wealth Through Property seminar",
+  body: `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:560px;margin:0 auto;">
+<p style="font-size:16px;line-height:1.6;color:#334155;">Hi there,</p>
+<p style="font-size:16px;line-height:1.6;color:#334155;">You recently started reserving your spot at the <strong>Build Wealth Through Property</strong> seminar — and we wanted to make sure you didn't miss out.</p>
+<p style="font-size:16px;line-height:1.6;color:#334155;">Sometimes the best intentions get interrupted. If you're still interested in learning how ordinary people build wealth through property (even without large savings), your seat is still available.</p>
+<div style="background:#fef3c7;border-radius:12px;padding:20px;margin:24px 0;">
+<p style="margin:0 0 8px 0;font-size:14px;color:#78350f;font-weight:600;">Event details</p>
+<p style="margin:0;font-size:15px;color:#334155;line-height:1.6;"><strong>When:</strong> Saturday, 14 March 2026 — 2:00 PM to 5:00 PM</p>
+<p style="margin:0;font-size:15px;color:#334155;line-height:1.6;"><strong>Where:</strong> Europa Hotel, Great Victoria Street, Belfast BT2 7AP</p>
+<p style="margin:0;font-size:15px;color:#334155;line-height:1.6;"><strong>Price:</strong> £25 per ticket</p>
+</div>
+<p style="font-size:16px;line-height:1.6;color:#334155;">You'll hear from property investor Chris Ifonlaja and a panel of experts on mortgages, tax planning, legal responsibilities, and real investment experiences. Limited seats are available.</p>
+<p style="font-size:16px;line-height:1.6;color:#334155;">Click below to complete your booking — it only takes a minute.</p>
+<p style="margin:28px 0;">
+<a href="{{BOOKING_URL}}" style="display:inline-block;background:#d97706;color:white;padding:14px 28px;text-decoration:none;border-radius:8px;font-weight:600;font-size:16px;">Complete your booking</a>
+</p>
+<p style="font-size:16px;line-height:1.6;color:#334155;">We'd love to see you there.</p>
+<p style="font-size:16px;line-height:1.6;color:#334155;">Best regards,<br>The Build Wealth Through Property Team</p>
+</div>`,
+};
+
 const AdminLeads: React.FC = () => {
   const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [admin, setAdmin] = useState<unknown>(null);
   const [leads, setLeads] = useState<Lead[]>([]);
+  const [pendingOrders, setPendingOrders] = useState<Order[]>([]);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [pendingLoading, setPendingLoading] = useState(false);
   const [campaignsLoading, setCampaignsLoading] = useState(false);
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState(1);
@@ -60,6 +88,11 @@ const AdminLeads: React.FC = () => {
   const [sendBody, setSendBody] = useState('');
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
+
+  const pendingEmails = pendingOrders
+    .map((o) => (o.customer_email || '').trim().toLowerCase())
+    .filter((e) => e && e.includes('@'));
+  const pendingEmailsDeduped = [...new Set(pendingEmails)];
 
   useEffect(() => {
     const currentAdmin = getCurrentAdmin();
@@ -85,6 +118,29 @@ const AdminLeads: React.FC = () => {
       }
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const loadPendingOrders = async () => {
+    try {
+      setPendingLoading(true);
+      const data = await fetchAllOrders();
+      const orders = Array.isArray(data) ? data : [];
+      const completedEmails = new Set(
+        orders.filter((o: Order) => o.status === 'completed').map((o) => (o.customer_email || '').trim().toLowerCase()).filter(Boolean)
+      );
+      const pending = orders
+        .filter((o: Order) => o.status === 'pending')
+        .filter((o) => !completedEmails.has((o.customer_email || '').trim().toLowerCase()));
+      setPendingOrders(pending);
+    } catch (error) {
+      console.error('Error loading pending orders:', error);
+      if (error instanceof Error && error.message === 'Unauthorized') {
+        logoutAdmin();
+        navigate('/admin/login');
+      }
+    } finally {
+      setPendingLoading(false);
     }
   };
 
@@ -118,6 +174,131 @@ const AdminLeads: React.FC = () => {
     setSendBody('');
     setSendError(null);
     setShowSendModal(true);
+  };
+
+  const loadAllPendingAndOpenModal = async () => {
+    try {
+      setPendingLoading(true);
+      const data = await fetchAllOrders();
+      const orders = Array.isArray(data) ? data : [];
+      const completedEmails = new Set(
+        orders.filter((o: Order) => o.status === 'completed').map((o) => (o.customer_email || '').trim().toLowerCase()).filter(Boolean)
+      );
+      const pending = orders
+        .filter((o: Order) => o.status === 'pending')
+        .filter((o) => !completedEmails.has((o.customer_email || '').trim().toLowerCase()));
+      setPendingOrders(pending);
+      const emails = [...new Set(pending.map((o) => (o.customer_email || '').trim().toLowerCase()).filter((e) => e && e.includes('@')))];
+      if (emails.length === 0) {
+        setSendError('No pending orders found.');
+        setShowSendModal(true);
+        return;
+      }
+      setSelectedEmails(new Set(emails));
+      setSendSubject(PENDING_REMINDER_TEMPLATE.subject);
+      setSendBody(
+        PENDING_REMINDER_TEMPLATE.body.replace(
+          '{{BOOKING_URL}}',
+          typeof window !== 'undefined' ? `${window.location.origin}/booking` : '/booking'
+        )
+      );
+      setSendError(null);
+      setShowSendModal(true);
+    } catch (err) {
+      console.error('Error loading pending:', err);
+      setSendError('Failed to load pending orders.');
+    } finally {
+      setPendingLoading(false);
+    }
+  };
+
+  const usePendingTemplate = () => {
+    setSendSubject(PENDING_REMINDER_TEMPLATE.subject);
+    setSendBody(
+      PENDING_REMINDER_TEMPLATE.body.replace(
+        '{{BOOKING_URL}}',
+        typeof window !== 'undefined' ? `${window.location.origin}/booking` : '/booking'
+      )
+    );
+  };
+
+  const handleLoadFromCSV = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const text = String(reader.result);
+      const lines = text.split(/\r?\n/).filter((l) => l.trim());
+      if (lines.length < 2) {
+        setSendError('CSV must have a header row and at least one data row.');
+        setShowSendModal(true);
+        e.target.value = '';
+        return;
+      }
+      const header = lines[0].toLowerCase().split(',').map((h) => h.trim().replace(/"/g, ''));
+      const emailIdx = header.findIndex((h) => h === 'email' || h === 'e-mail' || h === 'customer_email');
+      if (emailIdx < 0) {
+        setSendError('CSV must contain an "Email" or "customer_email" column.');
+        setShowSendModal(true);
+        e.target.value = '';
+        return;
+      }
+      const emails: string[] = [];
+      for (let i = 1; i < lines.length; i++) {
+        const row = lines[i].split(',').map((c) => c.trim().replace(/^"|"$/g, ''));
+        const val = row[emailIdx];
+        if (val && val.includes('@')) emails.push(val.toLowerCase());
+      }
+      const deduped = [...new Set(emails)];
+      setSelectedEmails(new Set(deduped));
+      setSendError(null);
+      setShowSendModal(true);
+      usePendingTemplate();
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
+
+  const downloadPendingCSV = async () => {
+    let orders = pendingOrders;
+    if (orders.length === 0) {
+      try {
+        setPendingLoading(true);
+        const data = await fetchAllOrders();
+        const all = Array.isArray(data) ? data : [];
+        const completedEmails = new Set(
+          all.filter((o: Order) => o.status === 'completed').map((o) => (o.customer_email || '').trim().toLowerCase()).filter(Boolean)
+        );
+        orders = all
+          .filter((o: Order) => o.status === 'pending')
+          .filter((o) => !completedEmails.has((o.customer_email || '').trim().toLowerCase()));
+        setPendingOrders(orders);
+      } catch {
+        setSendError('Failed to load pending orders for CSV.');
+        setShowSendModal(true);
+        return;
+      } finally {
+        setPendingLoading(false);
+      }
+    }
+    const headers = ['Order Reference', 'Name', 'Email', 'Product', 'Amount', 'Status', 'Created'];
+    const rows = orders.map((o) => [
+      o.order_reference || '',
+      (o.customer_name || '').replace(/,/g, ';'),
+      o.customer_email || '',
+      o.product_type || 'ticket',
+      o.amount_total ? String(o.amount_total / 100) : '',
+      o.status || 'pending',
+      o.created_at ? new Date(o.created_at).toISOString() : '',
+    ]);
+    const csv = [headers.join(','), ...rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(','))].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `pending-orders-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
   };
 
   const handleSendEmails = async () => {
@@ -232,6 +413,72 @@ const AdminLeads: React.FC = () => {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Pending Recovery */}
+        <div className="mb-8 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+          <div className="px-6 py-4 border-b border-slate-200 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+            <div>
+              <h2 className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                <Clock className="w-5 h-5 text-amber-500" />
+                Pending Recovery
+              </h2>
+              <p className="text-sm text-slate-600 mt-0.5">
+                Re-engage users who started checkout but didn&apos;t complete. Download CSV, load from file, or send a reminder email.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2 items-center">
+              <button
+                onClick={loadPendingOrders}
+                disabled={pendingLoading}
+                className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors flex items-center gap-2 disabled:opacity-50"
+              >
+                <RefreshCw className={`w-4 h-4 ${pendingLoading ? 'animate-spin' : ''}`} />
+                Load Pending
+              </button>
+              <button
+                onClick={downloadPendingCSV}
+                disabled={pendingLoading}
+                className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors flex items-center gap-2 disabled:opacity-50"
+              >
+                <Download className="w-4 h-4" />
+                Download Pending CSV {pendingOrders.length > 0 && `(${pendingOrders.length})`}
+              </button>
+              <button
+                onClick={loadAllPendingAndOpenModal}
+                disabled={pendingLoading}
+                className="px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors flex items-center gap-2 disabled:opacity-50"
+              >
+                {pendingLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Sparkles className="w-4 h-4" />
+                )}
+                Load All Pending & Send Reminder
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".csv"
+                onChange={handleLoadFromCSV}
+                className="hidden"
+              />
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors flex items-center gap-2"
+              >
+                <FileUp className="w-4 h-4" />
+                Load from CSV
+              </button>
+            </div>
+          </div>
+          {pendingOrders.length > 0 && (
+            <div className="px-6 py-3 bg-amber-50 border-t border-amber-100">
+              <p className="text-sm text-amber-800">
+                <strong>{pendingEmailsDeduped.length}</strong> unique email(s) from <strong>{pendingOrders.length}</strong> pending order(s) loaded.
+              </p>
+            </div>
+          )}
+        </div>
+
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
           <div className="px-6 py-4 border-b border-slate-200 flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
             <p className="text-slate-600 text-sm">
@@ -515,6 +762,14 @@ const AdminLeads: React.FC = () => {
               {sendError && (
                 <p className="text-sm text-red-600 bg-red-50 py-2 px-3 rounded-lg">{sendError}</p>
               )}
+              <button
+                type="button"
+                onClick={usePendingTemplate}
+                className="w-full py-2 px-3 bg-amber-50 text-amber-700 rounded-lg hover:bg-amber-100 transition-colors flex items-center justify-center gap-2 text-sm font-medium border border-amber-200"
+              >
+                <Sparkles className="w-4 h-4" />
+                Use Pending Reminder Template
+              </button>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Subject</label>
                 <input

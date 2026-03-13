@@ -16,14 +16,20 @@ import {
   Target,
   Briefcase,
   Home,
-  TrendingUp
+  TrendingUp,
+  Lock,
+  Mail,
+  User,
+  Loader2
 } from 'lucide-react';
 import CountdownTimer from './CountdownTimer';
 import FAQAccordion from './FAQAccordion';
 import PanelCard from './PanelCard';
+import ReasonCard from './ReasonCard';
 import Footer from './Footer';
 import { Link } from 'react-router-dom';
 import { trackEvent, trackPageView } from '@/lib/analytics';
+import { submitReasonsUnlockLead } from '@/lib/leads';
 
 // Image URLs
 const images = {
@@ -66,6 +72,37 @@ const panelists = [
   },
 ];
 
+const reasons = [
+  {
+    title: 'Multiple Pathways to Wealth',
+    description: "Property isn't one strategy — it's a system with options that create resilience and choice."
+  },
+  {
+    title: 'Predictable, Repeatable Income',
+    description: 'Rental income provides steady cash flow and long-term financial stability.'
+  },
+  {
+    title: 'Leverages "Other People\'s Money"',
+    description: 'Leverage allows small deposits to control large assets, multiplying returns and accelerating growth.'
+  },
+  {
+    title: 'Reliable Store of Value',
+    description: 'Property preserves wealth because land is scarce and demand is constant.'
+  },
+  {
+    title: 'Appreciates Over Time',
+    description: 'Property is one of the strongest appreciating assets, driven by supply, demand, and economic factors.'
+  },
+  {
+    title: 'Powerful Hedge Against Inflation',
+    description: 'As the cost of living rises, property protects purchasing power and makes debt cheaper in real terms.'
+  },
+  {
+    title: 'Significant Tax Advantages',
+    description: 'Governments encourage property ownership through various tax benefits and incentives.'
+  },
+];
+
 const whatYouWillLearn = [
   'Navigating buying and selling property in today\'s market',
   'Understanding mortgage affordability and interest-rate risks',
@@ -80,6 +117,7 @@ const ticketIncludes = [
   'Expert panel discussion with industry professionals',
   'Live audience Q&A session',
   'Free downloadable investor tools and checklists',
+  'Opportunity to purchase the book and support charity',
   'Networking with like-minded investors',
 ];
 
@@ -106,9 +144,19 @@ const audienceTypes = [
   },
 ];
 
+const REASONS_UNLOCKED_KEY = 'reasons_unlocked';
+
 const AppLayout: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [reasonsUnlocked, setReasonsUnlocked] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return localStorage.getItem(REASONS_UNLOCKED_KEY) === 'true';
+  });
+  const [unlockName, setUnlockName] = useState('');
+  const [unlockEmail, setUnlockEmail] = useState('');
+  const [unlockSubmitting, setUnlockSubmitting] = useState(false);
+  const [unlockError, setUnlockError] = useState<string | null>(null);
   
   useEffect(() => {
     const handleScroll = () => {
@@ -145,6 +193,30 @@ const AppLayout: React.FC = () => {
     setIsMenuOpen(false);
   };
 
+  const handleUnlockSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const name = unlockName.trim();
+    const email = unlockEmail.trim().toLowerCase();
+    if (!name || !email) {
+      setUnlockError('Please enter your name and email.');
+      return;
+    }
+    setUnlockError(null);
+    setUnlockSubmitting(true);
+    try {
+      await submitReasonsUnlockLead(name, email);
+      localStorage.setItem(REASONS_UNLOCKED_KEY, 'true');
+      setReasonsUnlocked(true);
+      setUnlockName('');
+      setUnlockEmail('');
+    } catch (err) {
+      console.error('Unlock submit error:', err);
+      setUnlockError('Something went wrong. Please try again.');
+    } finally {
+      setUnlockSubmitting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Navigation */}
@@ -176,6 +248,15 @@ const AppLayout: React.FC = () => {
                 </button>
               ))}
               <Link
+                to="/book"
+                className={`font-medium transition-colors flex items-center gap-2 ${
+                  isScrolled ? 'text-slate-600 hover:text-amber-600' : 'text-white/80 hover:text-white'
+                }`}
+              >
+                <BookOpen className="w-4 h-4" />
+                Buy Book
+              </Link>
+              <Link
                 to="/booking"
                 className="px-5 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-lg font-semibold hover:from-amber-600 hover:to-amber-700 transition-all shadow-lg shadow-amber-500/25"
               >
@@ -206,6 +287,14 @@ const AppLayout: React.FC = () => {
                   {item}
                 </button>
               ))}
+              <Link
+                to="/book"
+                onClick={() => setIsMenuOpen(false)}
+                className="w-full px-4 py-3 text-slate-600 hover:bg-slate-50 rounded-lg font-semibold text-center block flex items-center justify-center gap-2"
+              >
+                <BookOpen className="w-4 h-4" />
+                Buy Book
+              </Link>
               <Link
                 to="/booking"
                 onClick={() => setIsMenuOpen(false)}
@@ -256,6 +345,15 @@ const AppLayout: React.FC = () => {
                   Book Your Seat
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </Link>
+                <Link
+                  to="/book"
+                  onClick={() => trackEvent('home_book_page_cta_click')}
+                  className="group w-full sm:w-auto px-8 py-4 bg-white/10 backdrop-blur-sm border border-white/20 text-white rounded-xl font-semibold hover:bg-white/20 transition-all flex items-center justify-center gap-2"
+                >
+                  <BookOpen className="w-5 h-5" />
+                  Buy the Book
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </Link>
               </div>
               
               {/* Countdown Timer */}
@@ -275,6 +373,16 @@ const AppLayout: React.FC = () => {
                   className="w-48 mx-auto mb-6 rounded-lg shadow-2xl"
                   loading="lazy"
                 />
+                <div className="text-center mb-6">
+                  <p className="text-white font-semibold text-lg mb-2">Available Now</p>
+                  <p className="text-slate-300 text-sm mb-4">Purchase the book at the event or online</p>
+                  <Link
+                    to="/book"
+                    className="px-6 py-2.5 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/30 text-white rounded-lg font-semibold text-sm transition-all inline-block"
+                  >
+                    Buy the Book - £19.99
+                  </Link>
+                </div>
                 <div className="space-y-4">
                   <div className="flex items-center gap-4 text-white">
                     <div className="w-12 h-12 bg-amber-500/20 rounded-xl flex items-center justify-center">
@@ -369,13 +477,105 @@ const AppLayout: React.FC = () => {
             </p>
           </div>
           
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-16">
             {whatYouWillLearn.map((item, index) => (
               <div key={index} className="flex items-start gap-3 bg-slate-50 rounded-xl p-5 border border-slate-100">
                 <CheckCircle2 className="w-6 h-6 text-amber-500 flex-shrink-0 mt-0.5" />
                 <span className="text-slate-700">{item}</span>
               </div>
             ))}
+          </div>
+
+          {/* 7 Reasons - Lead gen */}
+          <div className="text-center max-w-3xl mx-auto mb-10">
+            <h3 className="text-2xl font-bold text-slate-800 mb-2">The 7 Core Reasons Property Builds Wealth</h3>
+            <p className="text-slate-600">These principles are explored in the book and at the seminar.</p>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {reasons.slice(0, 3).map((reason, index) => (
+              <ReasonCard key={index} number={index + 1} title={reason.title} description={reason.description} />
+            ))}
+            {!reasonsUnlocked ? (
+              <div className="md:col-span-2 lg:col-span-3 flex justify-center">
+                <div className="w-full max-w-xl bg-gradient-to-br from-amber-50 to-amber-100 border-2 border-amber-200 rounded-2xl p-8 shadow-lg">
+                  <div className="flex items-center justify-center gap-3 mb-6">
+                    <div className="w-14 h-14 rounded-xl bg-amber-500/20 flex items-center justify-center">
+                      <Lock className="w-7 h-7 text-amber-600" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-slate-800">Unlock 4 More Reasons</h3>
+                      <p className="text-slate-600 text-sm">Enter your details to see all 7 reasons</p>
+                    </div>
+                  </div>
+                  <form onSubmit={handleUnlockSubmit} className="max-w-md mx-auto space-y-4">
+                    {unlockError && (
+                      <p className="text-red-600 text-sm text-center bg-red-50 py-2 px-3 rounded-lg">{unlockError}</p>
+                    )}
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Name</label>
+                      <div className="relative">
+                        <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                        <input
+                          type="text"
+                          value={unlockName}
+                          onChange={(e) => setUnlockName(e.target.value)}
+                          placeholder="Your name"
+                          className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none"
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                        <input
+                          type="email"
+                          value={unlockEmail}
+                          onChange={(e) => setUnlockEmail(e.target.value)}
+                          placeholder="your@email.com"
+                          className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none"
+                          required
+                        />
+                      </div>
+                    </div>
+                    <button
+                      type="submit"
+                      disabled={unlockSubmitting}
+                      className="w-full py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 text-white font-semibold rounded-xl hover:from-amber-600 hover:to-amber-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                    >
+                      {unlockSubmitting ? (
+                        <>
+                          <Loader2 className="w-5 h-5 animate-spin" />
+                          Unlocking...
+                        </>
+                      ) : (
+                        <>
+                          <Lock className="w-5 h-5" />
+                          Unlock 4 More Reasons
+                        </>
+                      )}
+                    </button>
+                  </form>
+                </div>
+              </div>
+            ) : (
+              <>
+                {reasons.slice(3, 7).map((reason, index) => (
+                  <ReasonCard key={index + 3} number={index + 4} title={reason.title} description={reason.description} />
+                ))}
+                <div className="md:col-span-2 lg:col-span-3">
+                  <div className="bg-gradient-to-r from-slate-800 to-slate-900 rounded-2xl p-8 text-center">
+                    <p className="text-slate-300 text-lg mb-4">
+                      Each principle is explained using real-life experience — including mistakes, lessons learned, and practical examples.
+                    </p>
+                    <p className="text-amber-400 font-semibold">
+                      This is not a get-rich-quick talk. It is a grounded, experience-based session.
+                    </p>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </section>
@@ -422,6 +622,15 @@ const AppLayout: React.FC = () => {
                   <Ticket className="w-5 h-5" />
                   Book Your Seat
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </Link>
+                <Link
+                  to="/book"
+                  className="group px-6 py-3 bg-slate-100 text-slate-700 rounded-lg font-semibold hover:bg-slate-200 transition-all flex items-center gap-2"
+                >
+                  <BookOpen className="w-5 h-5" />
+                  Purchase the Book
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  £19.99
                 </Link>
               </div>
               <div className="mt-8 flex flex-wrap gap-4">
@@ -487,7 +696,7 @@ const AppLayout: React.FC = () => {
                   </div>
                 ))}
               </div>
-              <div className="mt-8">
+              <div className="mt-8 flex flex-col sm:flex-row gap-4">
                 <Link
                   to="/booking"
                   className="group inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl font-semibold text-lg hover:from-amber-600 hover:to-amber-700 transition-all shadow-xl shadow-amber-500/30"
@@ -495,6 +704,13 @@ const AppLayout: React.FC = () => {
                   <Ticket className="w-5 h-5" />
                   Book Your Seat Now
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </Link>
+                <Link
+                  to="/book"
+                  className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 border border-white/20 text-white rounded-xl font-semibold text-lg hover:bg-white/20 transition-all"
+                >
+                  <BookOpen className="w-5 h-5" />
+                  Buy the Book
                 </Link>
               </div>
             </div>
@@ -554,7 +770,7 @@ const AppLayout: React.FC = () => {
                   These materials will be available for you to take away on the day. No sign-up required.
                 </p>
               </div>
-              <div className="mt-8">
+              <div className="mt-8 flex flex-col sm:flex-row gap-4">
                 <Link
                   to="/booking"
                   className="group inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl font-semibold text-lg hover:from-amber-600 hover:to-amber-700 transition-all shadow-lg shadow-amber-500/25"
@@ -562,6 +778,13 @@ const AppLayout: React.FC = () => {
                   <Ticket className="w-5 h-5" />
                   Book Your Seat
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </Link>
+                <Link
+                  to="/book"
+                  className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-slate-100 text-slate-700 rounded-xl font-semibold text-lg hover:bg-slate-200 transition-all"
+                >
+                  <BookOpen className="w-5 h-5" />
+                  Buy the Book — £19.99
                 </Link>
               </div>
             </div>
@@ -678,7 +901,7 @@ const AppLayout: React.FC = () => {
             Whether you are just starting your property journey or looking to invest more wisely, this seminar will provide practical insights, real experiences, and clear next steps while also supporting a meaningful community cause.
           </p>
           
-          <div className="flex justify-center mb-10">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-10">
             <Link
               to="/booking"
               className="group px-10 py-5 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl font-semibold text-lg hover:from-amber-600 hover:to-amber-700 transition-all shadow-xl shadow-amber-500/30 flex items-center justify-center gap-3"
@@ -686,6 +909,13 @@ const AppLayout: React.FC = () => {
               <Ticket className="w-6 h-6" />
               Book Your Seat
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </Link>
+            <Link
+              to="/book"
+              className="group px-10 py-5 bg-white/10 border border-white/20 text-white rounded-xl font-semibold text-lg hover:bg-white/20 transition-all flex items-center justify-center gap-3"
+            >
+              <BookOpen className="w-6 h-6" />
+              Buy the Book
             </Link>
           </div>
           

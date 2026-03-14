@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { ThemeProvider } from "@/components/theme-provider";
 import Index from "./pages/Index";
+import Start from "./pages/Start";
 import Disclaimer from "./pages/Disclaimer";
 import Booking from "./pages/Booking";
 import BookPurchase from "./pages/BookPurchase";
@@ -31,6 +32,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/start" element={<Start />} />
             <Route path="/disclaimer" element={<Disclaimer />} />
             <Route path="/booking" element={<Booking />} />
             <Route path="/book" element={<BookPurchase />} />

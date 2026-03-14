@@ -10,6 +10,7 @@ import Index from "./pages/Index";
 import Start from "./pages/Start";
 import Disclaimer from "./pages/Disclaimer";
 import Booking from "./pages/Booking";
+import ZoomBooking from "./pages/ZoomBooking";
 import BookPurchase from "./pages/BookPurchase";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentCancelled from "./pages/PaymentCancelled";
@@ -35,6 +36,7 @@ const App = () => (
             <Route path="/start" element={<Start />} />
             <Route path="/disclaimer" element={<Disclaimer />} />
             <Route path="/booking" element={<Booking />} />
+            <Route path="/zoom" element={<ZoomBooking />} />
             <Route path="/book" element={<BookPurchase />} />
             {/* Payment success routes - support both /payment-success and /success */}
             <Route path="/payment-success" element={<PaymentSuccess />} />

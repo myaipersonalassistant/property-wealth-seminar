@@ -8,6 +8,7 @@ import {
   Mail, 
   Ticket, 
   BookOpen,
+  Video,
   ArrowRight,
   Home,
   Download,
@@ -42,6 +43,7 @@ const PaymentSuccess: React.FC = () => {
   const orderRef = searchParams.get('order_ref') || searchParams.get('ref') || searchParams.get('orderRef');
   const sessionId = searchParams.get('session_id') || searchParams.get('sessionId');
   const isBookPurchase = orderRef?.startsWith('BOOK-');
+  const isZoomPurchase = orderRef?.startsWith('ZOOM-');
 
   useEffect(() => {
     const fetchOrderDetails = async () => {
@@ -71,8 +73,16 @@ const PaymentSuccess: React.FC = () => {
               order_reference: orderRef,
               product_type: 'book',
             });
+          } else if (orderRef?.startsWith('ZOOM-')) {
+            setOrderDetails({
+              customer_name: 'Guest',
+              customer_email: 'Not yet confirmed',
+              quantity: 1,
+              amount_total: 1000, // £10.00 in cents
+              order_reference: orderRef,
+              product_type: 'zoom_ticket',
+            });
           } else {
-            // For tickets, we don't know the exact quantity, so show a generic message
             setOrderDetails({
               customer_name: 'Guest',
               customer_email: 'Not yet confirmed',
@@ -93,7 +103,7 @@ const PaymentSuccess: React.FC = () => {
     return () => clearTimeout(timer);
   }, [orderRef, isBookPurchase]);
 
-  const isTicketPurchase = !isBookPurchase;
+  const isTicketPurchase = !isBookPurchase && !isZoomPurchase;
 
   if (isLoading) {
     return (
@@ -151,11 +161,13 @@ const PaymentSuccess: React.FC = () => {
               </div>
             </div>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-800 mb-4">
-              {isBookPurchase ? 'Order Confirmed!' : 'Booking Confirmed!'}
+              {isBookPurchase ? 'Order Confirmed!' : isZoomPurchase ? 'Zoom Pass Confirmed!' : 'Booking Confirmed!'}
             </h1>
             <p className="text-xl text-slate-600 mb-2">
               {isBookPurchase 
                 ? 'Your book is on its way!' 
+                : isZoomPurchase 
+                ? 'Check your email for the Zoom link'
                 : 'Your tickets have been secured'}
             </p>
             <div className="inline-flex items-center gap-2 bg-green-50 text-green-700 rounded-full px-4 py-2 text-sm font-semibold">
@@ -191,6 +203,11 @@ const PaymentSuccess: React.FC = () => {
                       <BookOpen className="w-5 h-5 text-amber-600" />
                       Purchase Details
                     </>
+                  ) : isZoomPurchase ? (
+                    <>
+                      <Video className="w-5 h-5 text-indigo-600" />
+                      Zoom Pass Details
+                    </>
                   ) : (
                     <>
                       <Ticket className="w-5 h-5 text-amber-600" />
@@ -204,6 +221,14 @@ const PaymentSuccess: React.FC = () => {
                       <span className="text-slate-600">Tickets</span>
                       <span className="font-semibold text-slate-800">
                         {orderDetails.quantity}x @ £25.00
+                      </span>
+                    </div>
+                  )}
+                  {isZoomPurchase && orderDetails && (
+                    <div className="flex justify-between items-center py-2 border-b border-slate-200">
+                      <span className="text-slate-600">Zoom Passes</span>
+                      <span className="font-semibold text-slate-800">
+                        {orderDetails.quantity}x @ £10.00
                       </span>
                     </div>
                   )}
@@ -230,6 +255,11 @@ const PaymentSuccess: React.FC = () => {
                       <MapPin className="w-5 h-5 text-amber-600" />
                       Shipping Address
                     </>
+                  ) : isZoomPurchase ? (
+                    <>
+                      <Video className="w-5 h-5 text-indigo-600" />
+                      How to Join
+                    </>
                   ) : (
                     <>
                       <Calendar className="w-5 h-5 text-amber-600" />
@@ -238,7 +268,25 @@ const PaymentSuccess: React.FC = () => {
                   )}
                 </h3>
                 <div className="space-y-3 text-sm">
-                  {isTicketPurchase ? (
+                  {isZoomPurchase ? (
+                    <>
+                      <div className="flex items-center gap-3 text-slate-600">
+                        <Calendar className="w-4 h-4 text-indigo-500" />
+                        <span>Saturday, 14 March 2026</span>
+                      </div>
+                      <div className="flex items-center gap-3 text-slate-600">
+                        <Clock className="w-4 h-4 text-indigo-500" />
+                        <span>2:00 PM – 5:00 PM (UK time)</span>
+                      </div>
+                      <div className="flex items-center gap-3 text-slate-600">
+                        <Video className="w-4 h-4 text-indigo-500" />
+                        <span>Join via Zoom — link sent to your email</span>
+                      </div>
+                      <p className="text-indigo-700 font-medium mt-2">
+                        Check your inbox for the Zoom meeting link. Add the event to your calendar!
+                      </p>
+                    </>
+                  ) : isTicketPurchase ? (
                     <>
                       <div className="flex items-center gap-3 text-slate-600">
                         <Calendar className="w-4 h-4 text-amber-500" />

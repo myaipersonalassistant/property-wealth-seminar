@@ -15,7 +15,8 @@ import {
   CheckCircle2,
   ArrowLeft,
   Shield,
-  Lock
+  Lock,
+  Video
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { createCheckoutSession } from '@/lib/stripe';
@@ -169,6 +170,15 @@ const Booking: React.FC = () => {
                     </div>
                   </div>
 
+                  <div className="mb-4">
+                    <Link
+                      to="/zoom"
+                      className="flex items-center justify-center gap-2 w-full py-3 rounded-xl border border-slate-600 text-slate-300 hover:border-indigo-400 hover:text-indigo-300 font-medium text-sm transition-colors"
+                    >
+                      <Video className="w-4 h-4" />
+                      Join via Zoom — £10
+                    </Link>
+                  </div>
                   <div className="pt-6 border-t border-slate-700">
                     <div className="flex items-start gap-3 text-slate-300 text-sm">
                       <CheckCircle2 className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />

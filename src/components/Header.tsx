@@ -83,7 +83,7 @@ const Header: React.FC<HeaderProps> = ({ variant = 'solid', showBookButton = tru
           
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-8">
-            {['About', 'Speakers', 'Includes', 'FAQ'].map((item) => (
+            {['About', 'Speakers', 'FAQ'].map((item) => (
               <button
                 key={item}
                 onClick={() => scrollToSection(item.toLowerCase())}

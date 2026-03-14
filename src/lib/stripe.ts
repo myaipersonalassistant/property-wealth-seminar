@@ -43,6 +43,13 @@ export interface BookCheckoutSessionData {
   bookPrice: number;
 }
 
+export interface ZoomCheckoutSessionData {
+  name: string;
+  email: string;
+  phone?: string;
+  quantity: number;
+}
+
 export interface CheckoutSessionResponse {
   url?: string;
   error?: string;
@@ -206,6 +213,56 @@ export async function createBookCheckoutSession(
     return result;
   } catch (error) {
     console.error('❌ Error creating book checkout session:', error);
+    return {
+      error: error instanceof Error ? error.message : 'Failed to create checkout session',
+    };
+  }
+}
+
+/**
+ * Create a Stripe checkout session for Zoom pass
+ */
+export async function createZoomCheckoutSession(
+  data: ZoomCheckoutSessionData
+): Promise<CheckoutSessionResponse> {
+  try {
+    if (!STRIPE_PUBLISHABLE_KEY) {
+      throw new Error('Stripe publishable key is not configured');
+    }
+    const endpoint = `${API_BASE}/api/create-checkout-session`;
+    const payload = {
+      customerName: data.name,
+      customerEmail: data.email,
+      customerPhone: data.phone || '',
+      quantity: data.quantity,
+      productType: 'zoom_ticket',
+    };
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (!response.ok) {
+      const contentType = response.headers.get('content-type');
+      let errorMessage = `HTTP error! status: ${response.status}`;
+      if (contentType?.includes('application/json')) {
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch {
+          const text = await response.text();
+          errorMessage = text || errorMessage;
+        }
+      } else {
+        const text = await response.text();
+        errorMessage = text || errorMessage;
+      }
+      throw new Error(errorMessage);
+    }
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error('Error creating Zoom checkout session:', error);
     return {
       error: error instanceof Error ? error.message : 'Failed to create checkout session',
     };

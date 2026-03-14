@@ -469,12 +469,19 @@ const AdminDashboard: React.FC = () => {
                         <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${
                           order.product_type === 'book'
                             ? 'bg-purple-100 text-purple-700'
+                            : order.product_type === 'zoom_ticket'
+                            ? 'bg-indigo-100 text-indigo-700'
                             : 'bg-blue-100 text-blue-700'
                         }`}>
                           {order.product_type === 'book' ? (
                             <>
                               <BookOpen className="w-3 h-3" />
                               Book
+                            </>
+                          ) : order.product_type === 'zoom_ticket' ? (
+                            <>
+                              <Ticket className="w-3 h-3" />
+                              Zoom
                             </>
                           ) : (
                             <>
@@ -697,7 +704,7 @@ const AdminDashboard: React.FC = () => {
                 <div className="bg-slate-50 rounded-xl p-4 space-y-3">
                   <div className="flex justify-between items-center">
                     <span className="text-slate-600">
-                      {selectedOrder.product_type === 'book' ? 'Book' : 'Ticket'} Quantity
+                      {selectedOrder.product_type === 'book' ? 'Book' : selectedOrder.product_type === 'zoom_ticket' ? 'Zoom Pass' : 'Ticket'} Quantity
                     </span>
                     <span className="font-semibold text-slate-800">{selectedOrder.quantity}</span>
                   </div>
